@@ -81,7 +81,9 @@ class _MobileListScreenState extends ConsumerState<MobileListScreen> {
           children: [
             _Header(
               scope: state.scope,
-              total: state.totalNotes,
+              // The scope's own count, not the vault total: the number sits
+              // beside the scope title and has to agree with the list under it.
+              total: state.notes.length,
               controller: _query,
               onQueryChanged: (_) => setState(() {}),
               typeFilter: _typeFilter,

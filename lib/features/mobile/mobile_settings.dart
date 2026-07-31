@@ -9,6 +9,8 @@ import '../../widgets/jot_icons.dart';
 import '../../widgets/jot_primitives.dart';
 import '../settings/widgets/settings_controls.dart';
 import 'mobile_appearance.dart';
+import 'mobile_subscreens.dart';
+import 'mobile_trash.dart';
 
 /// 4a — Réglages, racine.
 ///
@@ -44,7 +46,7 @@ class MobileSettingsScreen extends ConsumerWidget {
                       MobileRow(
                         label: 'Général',
                         value: settings.defaultFolder,
-                        onTap: () {},
+                        onTap: () => _push(context, const MobileGeneralScreen()),
                       ),
                       MobileRow(
                         label: 'Apparence',
@@ -58,13 +60,13 @@ class MobileSettingsScreen extends ConsumerWidget {
                       MobileRow(
                         label: 'Capture rapide',
                         value: settings.captureFolder,
-                        onTap: () {},
+                        onTap: () => _push(context, const MobileCaptureScreen()),
                       ),
                       MobileRow(
                         label: 'Dossiers & tags',
                         value: '${vault.folders.length} · ${vault.tags.length}'
                             .replaceAll(' · ', ', '),
-                        onTap: () {},
+                        onTap: () => _push(context, const MobileFoldersScreen()),
                       ),
                     ],
                   ),
@@ -72,15 +74,13 @@ class MobileSettingsScreen extends ConsumerWidget {
                   MobileSection(
                     title: 'Données',
                     rows: [
-                      MobileRow(label: 'Stockage & sauvegarde', onTap: () {}),
+                      MobileRow(
+                        label: 'Stockage & sauvegarde',
+                        onTap: () => _push(context, const MobileStorageScreen()),
+                      ),
                       MobileRow(
                         label: 'Corbeille',
-                        onTap: () {
-                          ref
-                              .read(vaultProvider.notifier)
-                              .selectScope(const TrashScope());
-                          Navigator.of(context).pop();
-                        },
+                        onTap: () => _push(context, const MobileTrashScreen()),
                       ),
                       MobileRow(
                         label: 'Masquer les #creds',
@@ -99,7 +99,7 @@ class MobileSettingsScreen extends ConsumerWidget {
                       MobileRow(
                         label: 'À propos',
                         value: '1.4.0',
-                        onTap: () {},
+                        onTap: () => _push(context, const MobileAboutScreen()),
                       ),
                     ],
                   ),
@@ -124,6 +124,9 @@ class MobileSettingsScreen extends ConsumerWidget {
     );
   }
 }
+
+void _push(BuildContext context, Widget screen) => Navigator.of(context)
+    .push(MaterialPageRoute<void>(builder: (_) => screen));
 
 /// Header shared by every mobile subscreen: a back affordance in the accent
 /// colour, and the title centred when there is a parent to go back to.

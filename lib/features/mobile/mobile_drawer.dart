@@ -7,6 +7,7 @@ import '../../state/vault_notifier.dart';
 import '../../widgets/jot_icons.dart';
 import '../../widgets/jot_primitives.dart';
 import 'mobile_settings.dart';
+import 'mobile_trash.dart';
 
 /// 5a — the navigation drawer.
 ///
@@ -94,12 +95,14 @@ class MobileDrawer extends ConsumerWidget {
                           _DrawerRow(
                             icon: JotIcons.trash,
                             label: 'Corbeille',
-                            active: state.scope is TrashScope,
+                            active: false,
                             onTap: () {
-                              ref
-                                  .read(vaultProvider.notifier)
-                                  .selectScope(const TrashScope());
                               onClose();
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const MobileTrashScreen(),
+                                ),
+                              );
                             },
                           ),
                           if (state.tags.isNotEmpty) ...[
