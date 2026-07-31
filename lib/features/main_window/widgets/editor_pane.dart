@@ -9,6 +9,7 @@ import '../../../core/theme/jot_theme.dart';
 import '../../../core/utils/jot_format.dart';
 import '../../../state/settings_notifier.dart';
 import '../../../state/jot_services.dart';
+import '../../import/file_import.dart';
 import '../../../state/vault_notifier.dart';
 import '../../../widgets/jot_primitives.dart';
 import '../../../widgets/json_viewer.dart' show JsonViewer, copyToClipboard;
@@ -161,6 +162,16 @@ class _Header extends ConsumerWidget {
           _IconButton(
             onTap: () => copyToClipboard(note.content),
             child: JotIcon(JotIcons.copy, size: 13, color: JotColors.textMuted),
+          ),
+          // Anything the app can hold, it can hand back — including a note
+          // that was typed here rather than imported.
+          _IconButton(
+            onTap: () => pickAndExportNote(ref, note),
+            child: JotIcon(
+              JotIcons.download,
+              size: 13,
+              color: JotColors.textMuted,
+            ),
           ),
           Container(
             width: 1,

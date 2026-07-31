@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/note.dart';
 import '../../core/models/note_type.dart';
 import '../../core/theme/jot_theme.dart';
+import '../../data/file_repository.dart';
+import '../import/file_import.dart';
 import '../../state/vault_notifier.dart';
 import '../../widgets/jot_icons.dart';
 import '../../widgets/jot_primitives.dart';
@@ -73,6 +75,15 @@ class _ActionSheet extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).pop();
                     copyToClipboard(note.content);
+                  },
+                ),
+                _Row(
+                  icon: JotIcons.download,
+                  label: 'Enregistrer le fichier',
+                  value: FileRepository.suggestedFileName(note),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    pickAndExportNote(ref, note);
                   },
                 ),
                 _Row(

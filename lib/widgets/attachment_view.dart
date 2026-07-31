@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/models/note.dart';
 import '../core/theme/jot_theme.dart';
 import '../core/utils/jot_format.dart';
+import '../features/import/file_import.dart';
 import 'jot_icons.dart';
 import 'jot_primitives.dart';
 
@@ -15,7 +17,7 @@ import 'jot_primitives.dart';
 /// be slower than the one the user already has, and the promise here is
 /// retrieval, not display. So this states plainly what the file is, and hands
 /// it to the system on request.
-class AttachmentView extends StatefulWidget {
+class AttachmentView extends ConsumerStatefulWidget {
   const AttachmentView({super.key, required this.note, required this.file});
 
   final Note note;
@@ -25,10 +27,10 @@ class AttachmentView extends StatefulWidget {
   final File? file;
 
   @override
-  State<AttachmentView> createState() => _AttachmentViewState();
+  ConsumerState<AttachmentView> createState() => _AttachmentViewState();
 }
 
-class _AttachmentViewState extends State<AttachmentView> {
+class _AttachmentViewState extends ConsumerState<AttachmentView> {
   bool? _exists;
 
   @override
@@ -141,8 +143,14 @@ class _AttachmentViewState extends State<AttachmentView> {
                     ),
                     const SizedBox(width: 9),
                     _Button(
+                      icon: JotIcons.download,
+                      label: 'Enregistrer sous',
+                      onTap: () => pickAndExportNote(ref, note),
+                    ),
+                    const SizedBox(width: 9),
+                    _Button(
                       icon: JotIcons.folder,
-                      label: 'Afficher le fichier',
+                      label: 'Afficher',
                       onTap: _reveal,
                     ),
                   ],

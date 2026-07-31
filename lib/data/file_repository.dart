@@ -169,6 +169,7 @@ class FileRepository {
       color: _string(map['color']),
       attachment: _string(map['attachment']),
       attachmentBytes: _int(map['attachment_size']) ?? 0,
+      sourceName: _string(map['source']),
       // The body's size, not the file's — the frontmatter is bookkeeping and
       // has no business showing up in the status bar.
       sizeBytes: utf8.encode(body).length,
@@ -288,7 +289,7 @@ class FileRepository {
     if (length <= inlineLimitBytes) {
       final text = await _readAsTextOrNull(source);
       if (text != null) {
-        return create(
+        final note = await create(
           content: text,
           title: title,
           type: NoteTypeDetector.fromExtension(name) ??
@@ -296,6 +297,9 @@ class FileRepository {
           folder: folder,
           tags: tags,
         );
+        // Recorded after the fact rather than threaded through create(),
+        // which every other caller would have to ignore.
+        return write(note.copyWith(sourceName: name));
       }
     }
 
@@ -322,9 +326,53 @@ class FileRepository {
       relativePath: await _freePath(folder, title),
       attachment: stored,
       attachmentBytes: length,
+      sourceName: name,
     );
     return write(note);
   }
+
+  // ----------------------------------------------------------------- export
+
+  /// The bytes to hand back when the user asks for this note as a file.
+  ///
+  /// For an imported binary that is the copy in the vault, byte for byte. For
+  /// everything else it is the body as UTF-8, which is exactly what was read
+  /// in at import — a note that came from a CSV gives back the same CSV,
+  /// including any edits made since.
+  Future<List<int>> exportBytes(Note note) async {
+    final file = attachmentFile(note);
+    if (file != null) {
+      if (!await file.exists()) {
+        throw FileSystemException('pièce jointe introuvable', file.path);
+      }
+      return file.readAsBytes();
+    }
+    return utf8.encode(note.content);
+  }
+
+  /// The file name to offer in the save dialog.
+  ///
+  /// The imported name wins whenever there is one: handing back `ventes_q1.md`
+  /// for a file that arrived as `ventes_q1.csv` would be a small lie with real
+  /// consequences at the other end. Notes written inside the app have no
+  /// original name, so they get their title and an extension that matches what
+  /// the body actually is.
+  static String suggestedFileName(Note note) {
+    final source = note.sourceName;
+    if (source != null && source.trim().isNotEmpty) return source;
+
+    final base = VaultPaths.slugify(note.title);
+    return '$base${_extensionFor(note.type)}';
+  }
+
+  static String _extensionFor(NoteType type) => switch (type) {
+        NoteType.json => '.json',
+        // `code` covers everything from SQL to CSV here, and there is no way
+        // back to which. `.txt` opens everywhere and claims nothing false.
+        NoteType.code => '.txt',
+        NoteType.url || NoteType.text => '.md',
+        NoteType.file => '.bin',
+      };
 
   /// Reads [file] as UTF-8, or returns null when the bytes are not text.
   ///
@@ -516,6 +564,9 @@ class FileRepository {
       b
         ..writeln('attachment: ${_yamlString(note.attachment!)}')
         ..writeln('attachment_size: ${note.attachmentBytes}');
+    }
+    if (note.sourceName != null) {
+      b.writeln('source: ${_yamlString(note.sourceName!)}');
     }
 
     b

@@ -191,6 +191,8 @@ class _NoteList extends ConsumerWidget {
         if (target != null) await vault.move(note, target);
       case NoteAction.copy:
         await copyToClipboard(note.content);
+      case NoteAction.export:
+        await pickAndExportNote(ref, note);
       case NoteAction.delete:
         final confirmed = await confirmDeleteNote(context, note);
         if (confirmed == true) await vault.delete(note);

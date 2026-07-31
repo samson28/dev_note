@@ -1,10 +1,14 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/models/note.dart';
 import '../../core/theme/jot_theme.dart';
+import '../../data/file_repository.dart';
+import '../../state/jot_services.dart';
 import '../../state/vault_notifier.dart';
 import '../../widgets/jot_icons.dart';
 
@@ -24,6 +28,33 @@ Future<int> pickAndImportFiles(WidgetRef ref, {String? folder}) async {
   if (paths.isEmpty) return 0;
 
   return ref.read(vaultProvider.notifier).importFiles(paths, folder: folder);
+}
+
+/// Hands a note back as a file, at a location the user picks.
+///
+/// The counterpart to importing: anything that went in can come back out,
+/// under the name it arrived with. Returns the path written, or null when the
+/// user cancelled.
+///
+/// On mobile there is no "save as" dialog in the desktop sense — `saveFile`
+/// writes the bytes itself and reports where — so the same call covers both.
+Future<String?> pickAndExportNote(WidgetRef ref, Note note) async {
+  final files = ref.read(servicesProvider).files;
+
+  final List<int> bytes;
+  try {
+    bytes = await files.exportBytes(note);
+  } on Object {
+    // The only way here is an attachment whose bytes are gone; the card
+    // already says so, and a dialog on top would add nothing.
+    return null;
+  }
+
+  return FilePicker.saveFile(
+    dialogTitle: 'Enregistrer sous',
+    fileName: FileRepository.suggestedFileName(note),
+    bytes: Uint8List.fromList(bytes),
+  );
 }
 
 /// Whether drag-and-drop is worth wiring up on this platform.

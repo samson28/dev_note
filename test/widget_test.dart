@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -331,6 +332,73 @@ void main() {
       );
       expect(binary.type, NoteType.file);
       expect(binary.attachmentExtension, isNull);
+    });
+
+    test('a flat file comes back out under its original name', () async {
+      // The whole point of recording the source name: the note is titled
+      // "ventes_q1" and typed as code, so nothing else could reconstruct
+      // ".csv".
+      final csv = at('ventes_q1.csv')
+        ..writeAsStringSync('mois,total\njanvier,1240\n');
+      final note = await files.importFile(csv);
+
+      expect(note.sourceName, 'ventes_q1.csv');
+      expect(FileRepository.suggestedFileName(note), 'ventes_q1.csv');
+      expect(
+        utf8.decode(await files.exportBytes(note)),
+        'mois,total\njanvier,1240\n',
+      );
+    });
+
+    test('a binary comes back byte for byte', () async {
+      final bytes = [0x25, 0x50, 0x44, 0x46, 0x00, 0xFF, 0x7F, 0x01];
+      final pdf = at('facture.pdf')..writeAsBytesSync(bytes);
+      final note = await files.importFile(pdf);
+
+      expect(FileRepository.suggestedFileName(note), 'facture.pdf');
+      expect(await files.exportBytes(note), bytes);
+    });
+
+    test('the source name survives the frontmatter round-trip', () async {
+      final created = await files.importFile(
+        at('config.xml')..writeAsStringSync('<a/>'),
+      );
+      final read = await files.read(
+        File('${root.path}/${created.relativePath}'),
+      );
+      expect(read.sourceName, 'config.xml');
+    });
+
+    test('edits made after import are what comes back out', () async {
+      final note = await files.importFile(
+        at('notes.json')..writeAsStringSync('{"a": 1}'),
+      );
+      await files.write(note.copyWith(content: '{"a": 2}'));
+
+      final read = await files.read(
+        File('${root.path}/${note.relativePath}'),
+      );
+      expect(utf8.decode(await files.exportBytes(read)), '{"a": 2}');
+      expect(FileRepository.suggestedFileName(read), 'notes.json');
+    });
+
+    test('a note typed in the app gets a name from its title and type',
+        () async {
+      final note = await files.create(
+        content: '{"a": 1}',
+        title: 'Réponse webhook',
+      );
+      expect(note.sourceName, isNull);
+      expect(FileRepository.suggestedFileName(note), 'reponse-webhook.json');
+    });
+
+    test('exporting an attachment whose bytes vanished fails loudly', () async {
+      final note = await files.importFile(
+        at('perdu.pdf')..writeAsBytesSync([0x00, 1]),
+      );
+      await files.attachmentFile(note)!.delete();
+
+      expect(files.exportBytes(note), throwsA(isA<FileSystemException>()));
     });
 
     test('attachments are invisible to the note walk and the folder list',

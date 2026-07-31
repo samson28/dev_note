@@ -27,6 +27,7 @@ class Note {
     this.fileSize = 0,
     this.attachment,
     this.attachmentBytes = 0,
+    this.sourceName,
   });
 
   final String id;
@@ -61,6 +62,19 @@ class Note {
   /// means keeps working; this is just a pointer beside the bytes.
   final String? attachment;
   final int attachmentBytes;
+
+  /// Name of the file this note was imported from, kept so it can be handed
+  /// back unchanged.
+  ///
+  /// A flat file is inlined at import — its text becomes the body, which is
+  /// what makes it searchable — and with it the extension would be gone. That
+  /// is fine until the user wants the file back: `ventes_q1` is not a CSV, and
+  /// guessing `.txt` from the note type would hand them something their
+  /// spreadsheet refuses to open.
+  final String? sourceName;
+
+  /// True when the note can be handed back as a file.
+  bool get isExportable => attachment != null || content.isNotEmpty;
 
   /// The imported file's own name, as the user knew it.
   String? get attachmentName {
@@ -110,6 +124,7 @@ class Note {
     int? fileSize,
     String? attachment,
     int? attachmentBytes,
+    String? sourceName,
   }) => Note(
     id: id,
     title: title ?? this.title,
@@ -127,6 +142,7 @@ class Note {
     fileSize: fileSize ?? this.fileSize,
     attachment: attachment ?? this.attachment,
     attachmentBytes: attachmentBytes ?? this.attachmentBytes,
+    sourceName: sourceName ?? this.sourceName,
   );
 
   @override

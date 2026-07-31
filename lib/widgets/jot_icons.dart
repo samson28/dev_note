@@ -35,6 +35,7 @@ abstract final class JotIcons {
   static const restore = LucideIcons.undo2;
   static const edit = LucideIcons.pencil;
   static const open = LucideIcons.externalLink;
+  static const download = LucideIcons.download;
   static const import_ = LucideIcons.filePlus;
   static const file = LucideIcons.fileText;
   static const arrowUp = LucideIcons.arrowUp;

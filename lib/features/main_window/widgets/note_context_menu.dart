@@ -6,11 +6,12 @@ import '../../../widgets/type_badge.dart';
 
 import '../../../core/models/note.dart';
 import '../../../core/theme/jot_theme.dart';
+import '../../../widgets/jot_icons.dart';
 import '../../../widgets/jot_primitives.dart';
 import 'prompt_dialog.dart';
 
 /// Actions available on a note row, matching the design's `···` menu.
-enum NoteAction { pin, tag, move, copy, delete }
+enum NoteAction { pin, tag, move, copy, export, delete }
 
 /// The floating menu itself: `#22242A` on `#34363D`, 196px wide, 8px radius,
 /// 28px rows with a keycap hint on the right.
@@ -41,31 +42,39 @@ class NoteContextMenu extends StatelessWidget {
               onTap: () => onAction(NoteAction.pin),
             ),
             _MenuItem(
-              leadingText: '#',
+              leading: JotIcon(JotIcons.tag, size: 11, color: JotColors.textDim),
               label: 'Ajouter un tag...',
               shortcut: 'Ctrl T',
               onTap: () => onAction(NoteAction.tag),
             ),
             _MenuItem(
-              leading: FolderGlyph(color: JotColors.textDim, width: 9, height: 8),
+              leading: JotIcon(JotIcons.move, size: 11, color: JotColors.textDim),
               label: 'Déplacer vers...',
               shortcut: 'Ctrl M',
               onTap: () => onAction(NoteAction.move),
             ),
             _MenuItem(
-              leadingText: '⧉',
+              leading: JotIcon(JotIcons.copy, size: 11, color: JotColors.textDim),
               label: 'Copier le contenu',
               shortcut: 'Ctrl C',
               onTap: () => onAction(NoteAction.copy),
+            ),
+            _MenuItem(
+              leading:
+                  JotIcon(JotIcons.download, size: 11, color: JotColors.textDim),
+              label: 'Enregistrer sous...',
+              shortcut: 'Ctrl S',
+              onTap: () => onAction(NoteAction.export),
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 2, vertical: 4),
               child: Hairline(color: JotColors.borderRaised),
             ),
             _MenuItem(
-              leadingText: '✕',
+              leading:
+                  JotIcon(JotIcons.trash, size: 11, color: JotColors.danger),
               label: 'Supprimer',
-              shortcut: '⌫',
+              shortcut: 'Suppr',
               danger: true,
               onTap: () => onAction(NoteAction.delete),
             ),
@@ -80,12 +89,10 @@ class _MenuItem extends StatelessWidget {
     required this.shortcut,
     required this.onTap,
     this.leading,
-    this.leadingText,
     this.danger = false,
   });
 
   final Widget? leading;
-  final String? leadingText;
   final String label;
   final String shortcut;
   final VoidCallback onTap;
@@ -106,15 +113,7 @@ class _MenuItem extends StatelessWidget {
               SizedBox(
                 width: 9,
                 child: Center(
-                  child: leading ??
-                      Text(
-                        leadingText ?? '',
-                        style: JotText.mono(
-                          size: 11,
-                          weight: FontWeight.w500,
-                          color: danger ? JotColors.danger : JotColors.textDim,
-                        ),
-                      ),
+                  child: leading ?? const SizedBox.shrink(),
                 ),
               ),
               const SizedBox(width: 9),
