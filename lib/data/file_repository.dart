@@ -29,18 +29,20 @@ class TrashedNote {
     required this.file,
     required this.originalPath,
     required this.deletedAt,
-    String? title,
-  }) : _title = title;
+    this.frontmatterTitle,
+  });
 
   final File file;
   final String originalPath;
   final DateTime deletedAt;
-  final String? _title;
+
+  /// Title read from the trashed file, when it was readable.
+  final String? frontmatterTitle;
 
   /// The note's own title, falling back to the file name when the frontmatter
   /// could not be read.
   String get title =>
-      _title ?? p.basenameWithoutExtension(originalPath);
+      frontmatterTitle ?? p.basenameWithoutExtension(originalPath);
 }
 
 /// Reads and writes the vault: one `.md` file per note, YAML frontmatter on
@@ -305,7 +307,7 @@ class FileRepository {
         file: entity,
         originalPath: name.substring(split + 1).replaceAll('!', '/'),
         deletedAt: DateTime.fromMillisecondsSinceEpoch(stamp),
-        title: title,
+        frontmatterTitle: title,
       ));
     }
 

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../../core/theme/jot_theme.dart';
+import '../../../widgets/jot_icons.dart';
 import '../../../widgets/jot_primitives.dart';
 
 /// The custom 40px title bar from the design. The OS chrome is hidden
@@ -71,9 +72,7 @@ class _WindowButtons extends StatelessWidget {
         children: [
           _WindowButton(
             onTap: windowManager.minimize,
-            // Drawn, not typed: the design dropped the em dash character, and
-            // a 1px rule is the actual Windows minimise affordance anyway.
-            child: Container(width: 10, height: 1, color: JotColors.textDim),
+            child: JotIcon(JotIcons.minimise, size: 15, color: JotColors.textDim),
           ),
           const SizedBox(width: 2),
           _WindowButton(
@@ -84,20 +83,13 @@ class _WindowButtons extends StatelessWidget {
                 await windowManager.maximize();
               }
             },
-            child: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                border: Border.all(color: JotColors.textDim, width: 1.5),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            child: JotIcon(JotIcons.maximise, size: 12, color: JotColors.textDim),
           ),
           const SizedBox(width: 2),
           _WindowButton(
             hoverColor: JotColors.danger,
             onTap: windowManager.close,
-            child: Text('✕', style: JotText.ui(size: 15, color: JotColors.textDim)),
+            child: JotIcon(JotIcons.close, size: 15, color: JotColors.textDim),
           ),
         ],
       );

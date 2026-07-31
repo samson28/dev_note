@@ -46,6 +46,7 @@ dependencies:
   desktop_multi_window: ^0.3.0
   flutter_riverpod: ^2.6.1
   uuid: ^4.6.0
+  lucide_icons_flutter: ^3.1.15
 
 dev_dependencies:
   flutter_test:

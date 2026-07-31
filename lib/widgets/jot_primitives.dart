@@ -3,35 +3,26 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import '../core/theme/jot_theme.dart';
+import 'jot_icons.dart';
 
-/// The pin marker: `9×9`, `border-radius:50% 50% 2px 50%`, rotated 45°.
+/// The pin marker. Filled when the note is pinned, outlined when it is the
+/// affordance to pin one.
 class PinMark extends StatelessWidget {
-  const PinMark({super.key, this.active = true, this.size = 9});
+  const PinMark({super.key, this.active = true, this.size = 13});
 
   final bool active;
   final double size;
 
   @override
-  Widget build(BuildContext context) => Transform.rotate(
-        angle: math.pi / 4,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: active ? JotColors.accent : JotColors.textDisabled,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(size / 2),
-              topRight: Radius.circular(size / 2),
-              bottomRight: const Radius.circular(2),
-              bottomLeft: Radius.circular(size / 2),
-            ),
-          ),
-        ),
+  Widget build(BuildContext context) => JotIcon(
+        JotIcons.pin,
+        size: size,
+        color: active ? JotColors.accent : JotColors.textDisabled,
       );
 }
 
-/// The outlined rectangle used as the folder icon:
-/// `13×11`, `1.5px` border, `2px` radius.
+/// The folder icon. [width] and [height] are kept from the hand-drawn version
+/// so existing call sites keep their sizing; the larger of the two wins.
 class FolderGlyph extends StatelessWidget {
   const FolderGlyph({super.key, required this.color, this.width = 13, this.height = 11});
 
@@ -40,14 +31,8 @@ class FolderGlyph extends StatelessWidget {
   final double height;
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          border: Border.all(color: color, width: 1.5),
-          borderRadius: BorderRadius.circular(2),
-        ),
-      );
+  Widget build(BuildContext context) =>
+      JotIcon(JotIcons.folder, size: math.max(width, height) + 1, color: color);
 }
 
 /// Keyboard hint chip. Two flavours in the design: filled (`#23252A`, inside
@@ -277,34 +262,18 @@ class _HoverableState extends State<Hoverable> {
       );
 }
 
-/// The overflow affordance, drawn as three dots rather than typed as `···`.
-///
-/// The design removed middot characters from its copy, but the affordance
-/// itself is still needed; drawing it keeps the shape without depending on a
-/// character the design no longer uses.
+/// The overflow affordance.
 class OverflowDots extends StatelessWidget {
-  const OverflowDots({super.key, this.color, this.dot = 2.5, this.gap = 2.5});
+  const OverflowDots({super.key, this.color, this.size = 15});
 
   final Color? color;
-  final double dot;
-  final double gap;
+  final double size;
 
   @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var i = 0; i < 3; i++) ...[
-            if (i > 0) SizedBox(width: gap),
-            Container(
-              width: dot,
-              height: dot,
-              decoration: BoxDecoration(
-                color: color ?? JotColors.textDim,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ],
-        ],
+  Widget build(BuildContext context) => JotIcon(
+        JotIcons.overflow,
+        size: size,
+        color: color ?? JotColors.textDim,
       );
 }
 

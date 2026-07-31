@@ -449,7 +449,8 @@ class _DetailHeader extends ConsumerWidget {
             const SizedBox(width: 8),
             Hoverable(
               onTap: () => _rename(context, ref),
-              builder: (context, _) => OverflowDots(color: JotColors.textMuted, dot: 3.5, gap: 3),
+              builder: (context, _) =>
+                  OverflowDots(color: JotColors.textMuted, size: 18),
             ),
           ],
         ),
