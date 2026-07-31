@@ -8,6 +8,7 @@ import '../../../core/models/note_type.dart';
 import '../../../core/theme/jot_theme.dart';
 import '../../../core/utils/jot_format.dart';
 import '../../../state/settings_notifier.dart';
+import '../../../state/jot_services.dart';
 import '../../../state/vault_notifier.dart';
 import '../../../widgets/jot_primitives.dart';
 import '../../../widgets/json_viewer.dart' show JsonViewer, copyToClipboard;
@@ -70,6 +71,8 @@ class _EditorState extends ConsumerState<_Editor> {
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
             child: NoteBody(
               note: note,
+              attachmentFile:
+                  ref.read(servicesProvider).files.attachmentFile(note),
               showLineNumbers: ref.watch(
                 settingsProvider.select((s) => s.showLineNumbers),
               ),

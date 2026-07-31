@@ -34,6 +34,9 @@ abstract final class JotIcons {
   static const move = LucideIcons.folderInput;
   static const restore = LucideIcons.undo2;
   static const edit = LucideIcons.pencil;
+  static const open = LucideIcons.externalLink;
+  static const import_ = LucideIcons.filePlus;
+  static const file = LucideIcons.fileText;
   static const arrowUp = LucideIcons.arrowUp;
   static const arrowDown = LucideIcons.arrowDown;
   static const minimise = LucideIcons.minus;

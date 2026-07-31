@@ -25,6 +25,8 @@ class Note {
     this.sizeBytes = 0,
     this.fileModified,
     this.fileSize = 0,
+    this.attachment,
+    this.attachmentBytes = 0,
   });
 
   final String id;
@@ -54,6 +56,30 @@ class Note {
   final DateTime? fileModified;
   final int fileSize;
 
+  /// For an imported binary: the path of the copied file, relative to the
+  /// vault root. The note itself stays a plain `.md` so a vault synced by any
+  /// means keeps working; this is just a pointer beside the bytes.
+  final String? attachment;
+  final int attachmentBytes;
+
+  /// The imported file's own name, as the user knew it.
+  String? get attachmentName {
+    final path = attachment;
+    if (path == null) return null;
+    final base = path.split('/').last;
+    // Stored as `<uuid>!<original name>`, the same separator the trash uses.
+    // A uuid contains no `!`, so the first one is always the boundary, even
+    // when the file the user picked has one in its name.
+    final mark = base.indexOf('!');
+    return mark == -1 ? base : base.substring(mark + 1);
+  }
+
+  String? get attachmentExtension {
+    final name = attachmentName;
+    if (name == null || !name.contains('.')) return null;
+    return name.split('.').last.toUpperCase();
+  }
+
   /// The body collapsed onto a single line — this is what the note list and
   /// palette show under the title.
   ///
@@ -82,6 +108,8 @@ class Note {
     int? sizeBytes,
     DateTime? fileModified,
     int? fileSize,
+    String? attachment,
+    int? attachmentBytes,
   }) => Note(
     id: id,
     title: title ?? this.title,
@@ -97,6 +125,8 @@ class Note {
     sizeBytes: sizeBytes ?? this.sizeBytes,
     fileModified: fileModified ?? this.fileModified,
     fileSize: fileSize ?? this.fileSize,
+    attachment: attachment ?? this.attachment,
+    attachmentBytes: attachmentBytes ?? this.attachmentBytes,
   );
 
   @override

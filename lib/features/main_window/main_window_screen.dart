@@ -1,3 +1,4 @@
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart' show Scaffold;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -12,6 +13,7 @@ import 'widgets/note_context_menu.dart';
 import '../../state/search_notifier.dart';
 import '../../state/vault_notifier.dart';
 import '../../widgets/jot_primitives.dart';
+import '../import/file_import.dart';
 import '../quick_capture/quick_capture_hosts.dart';
 import '../quick_capture/quick_capture_launcher.dart';
 import '../search_palette/search_palette.dart';
@@ -56,7 +58,19 @@ class _MainWindowScreenState extends ConsumerState<MainWindowScreen> {
 
     return Scaffold(
       backgroundColor: JotColors.window,
-      body: _Shortcuts(
+      body: _DropZone(
+        onDropped: (paths) async {
+          final count =
+              await ref.read(vaultProvider.notifier).importFiles(paths);
+          if (count > 0) {
+            ref.read(vaultProvider.notifier).notify(
+                  count == 1
+                      ? 'Fichier importé'
+                      : '$count fichiers importés',
+                );
+          }
+        },
+        child: _Shortcuts(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -85,6 +99,46 @@ class _MainWindowScreenState extends ConsumerState<MainWindowScreen> {
             ),
           ],
         ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Wraps the window so files dragged from the file manager land in the vault.
+///
+/// This is the fastest import path there is — no dialog, no folder to
+/// navigate — so it covers the whole window rather than a designated strip.
+class _DropZone extends StatefulWidget {
+  const _DropZone({required this.child, required this.onDropped});
+
+  final Widget child;
+  final ValueChanged<List<String>> onDropped;
+
+  @override
+  State<_DropZone> createState() => _DropZoneState();
+}
+
+class _DropZoneState extends State<_DropZone> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!supportsFileDrop) return widget.child;
+
+    return DropTarget(
+      onDragEntered: (_) => setState(() => _hovering = true),
+      onDragExited: (_) => setState(() => _hovering = false),
+      onDragDone: (detail) {
+        setState(() => _hovering = false);
+        final paths = detail.files.map((f) => f.path).toList();
+        if (paths.isNotEmpty) widget.onDropped(paths);
+      },
+      child: Stack(
+        children: [
+          widget.child,
+          if (_hovering) const DropTargetOverlay(),
+        ],
       ),
     );
   }

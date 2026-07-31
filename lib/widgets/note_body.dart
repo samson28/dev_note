@@ -1,10 +1,13 @@
 // Material is imported for TextField/InputDecoration/SelectableText only —
 // the visual language comes entirely from JotTheme, not from Material.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../core/models/note.dart';
 import '../core/models/note_type.dart';
 import '../core/theme/jot_theme.dart';
+import 'attachment_view.dart';
 import 'code_viewer.dart';
 import 'json_viewer.dart';
 
@@ -22,9 +25,14 @@ class NoteBody extends StatefulWidget {
     this.fontSize = 12.5,
     this.showLineNumbers = true,
     this.framed = true,
+    this.attachmentFile,
   });
 
   final Note note;
+
+  /// Set for an imported binary: the copy inside the vault. The panel shows
+  /// the attachment card instead of a viewer when this note has one.
+  final File? attachmentFile;
   final ValueChanged<String> onChanged;
   final double fontSize;
   final bool showLineNumbers;
@@ -80,6 +88,12 @@ class _NoteBodyState extends State<NoteBody> {
 
   @override
   Widget build(BuildContext context) {
+    // An attachment has no editable body: what the note holds is a pointer,
+    // and letting the user type over it would only break the pointer.
+    if (widget.note.type == NoteType.file) {
+      return AttachmentView(note: widget.note, file: widget.attachmentFile);
+    }
+
     final showRaw = _raw || _alwaysRaw;
 
     final panel = Container(
@@ -127,7 +141,7 @@ class _NoteBodyState extends State<NoteBody> {
           fontSize: widget.fontSize,
         ),
       NoteType.url => _UrlView(url: content, fontSize: widget.fontSize),
-      NoteType.text => const SizedBox.shrink(),
+      NoteType.text || NoteType.file => const SizedBox.shrink(),
     };
 
     // A double-click anywhere in the rendered body drops straight into the

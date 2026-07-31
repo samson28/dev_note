@@ -246,6 +246,41 @@ class VaultNotifier extends Notifier<VaultState> {
     return note;
   }
 
+  /// Imports files from disk, one note each, and opens the last one.
+  ///
+  /// Returns how many were imported. Files that cannot be read are skipped
+  /// rather than aborting the batch: dropping ten files and losing all ten to
+  /// one locked handle would be the wrong trade.
+  Future<int> importFiles(Iterable<String> paths, {String? folder}) async {
+    final target = folder ??
+        switch (state.scope) {
+          FolderScope(folder: final current) => current,
+          TagScope() || TrashScope() => Folder.inbox,
+        };
+
+    Note? last;
+    var imported = 0;
+    for (final path in paths) {
+      final source = File(path);
+      if (!await source.exists()) continue;
+      try {
+        final note = await _services.files.importFile(source, folder: target);
+        _services.watcher.expectSelfWrite(note.relativePath);
+        await _services.index.upsert(note);
+        last = note;
+        imported++;
+      } on Object {
+        continue;
+      }
+    }
+
+    if (imported > 0) {
+      await refresh();
+      if (last != null) await open_(last);
+    }
+    return imported;
+  }
+
   /// Debounced autosave — the design's status bar says "Enregistré
   /// automatiquement", so there is no save button to press.
   void edit(Note updated) {
@@ -305,12 +340,22 @@ class VaultNotifier extends Notifier<VaultState> {
   Future<void> rebuildIndex() async {
     state = state.copyWith(loading: true);
     await _services.index.rebuild();
+    // The vault is being walked anyway, so this is the cheapest moment to
+    // drop attachment bytes whose note is long gone.
+    final orphans = await _services.files.purgeOrphanAttachments();
     await refresh();
+
+    final rebuilt = 'Index reconstruit en '
+        '${_services.index.lastRebuild?.inMilliseconds ?? 0} ms';
     state = state.copyWith(
-      notice: 'Index reconstruit en '
-          '${_services.index.lastRebuild?.inMilliseconds ?? 0} ms',
+      notice: orphans == 0
+          ? rebuilt
+          : '$rebuilt, $orphans fichier${orphans == 1 ? '' : 's'} orphelin'
+              '${orphans == 1 ? '' : 's'} supprimé${orphans == 1 ? '' : 's'}',
     );
   }
+
+  void notify(String message) => state = state.copyWith(notice: message);
 
   void dismissNotice() => state = state.copyWith(clearNotice: true);
 }

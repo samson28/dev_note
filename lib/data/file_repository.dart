@@ -167,6 +167,8 @@ class FileRepository {
       relativePath: relative,
       pinned: map['pinned'] == true,
       color: _string(map['color']),
+      attachment: _string(map['attachment']),
+      attachmentBytes: _int(map['attachment_size']) ?? 0,
       // The body's size, not the file's — the frontmatter is bookkeeping and
       // has no business showing up in the status bar.
       sizeBytes: utf8.encode(body).length,
@@ -250,6 +252,141 @@ class FileRepository {
       await _deleteAt(previous.relativePath);
     }
     return saved;
+  }
+
+  // ----------------------------------------------------------------- import
+
+  /// Where imported binaries are copied. Dot-prefixed like the trash, so the
+  /// sidebar never shows it as a folder.
+  static const attachmentsDirName = '.attachments';
+
+  /// Anything above this is copied rather than inlined, whatever it contains.
+  /// A 5 MB CSV pasted into an editor would freeze the window, and the point
+  /// of the app is that nothing about it stutters.
+  static const inlineLimitBytes = 2 * 1024 * 1024;
+
+  Directory get attachmentsDir =>
+      Directory(p.join(root.path, attachmentsDirName));
+
+  /// Imports [source] into the vault and returns the note that now stands for
+  /// it.
+  ///
+  /// Flat files become ordinary notes with their text as the body, which is
+  /// what makes them searchable — the whole value of importing a CSV or an
+  /// XML into Jot is finding it again by its contents. Anything that is not
+  /// text, or is too big to edit comfortably, is copied into the vault and
+  /// referenced by the note instead.
+  Future<Note> importFile(
+    File source, {
+    String folder = Folder.inbox,
+    List<String> tags = const [],
+  }) async {
+    final name = p.basename(source.path);
+    final title = p.basenameWithoutExtension(source.path);
+    final length = await source.length();
+
+    if (length <= inlineLimitBytes) {
+      final text = await _readAsTextOrNull(source);
+      if (text != null) {
+        return create(
+          content: text,
+          title: title,
+          type: NoteTypeDetector.fromExtension(name) ??
+              NoteTypeDetector.detect(text),
+          folder: folder,
+          tags: tags,
+        );
+      }
+    }
+
+    // Prefixed with a uuid so two imports of `facture.pdf` cannot collide,
+    // and so the copy is never mistaken for a file the user placed there.
+    final stored = '$attachmentsDirName/${_uuid.v4()}!$name';
+    if (!await attachmentsDir.exists()) {
+      await attachmentsDir.create(recursive: true);
+    }
+    await source.copy(p.joinAll([root.path, ...p.split(stored)]));
+
+    final now = DateTime.now();
+    final note = Note(
+      id: _uuid.v4(),
+      title: title,
+      type: NoteType.file,
+      // The body is what search matches on, so it holds the words a person
+      // would actually type looking for this file.
+      content: '$name\n${_extensionLabel(name)}, ${_humanBytes(length)}',
+      folder: folder,
+      tags: tags,
+      created: now,
+      modified: now,
+      relativePath: await _freePath(folder, title),
+      attachment: stored,
+      attachmentBytes: length,
+    );
+    return write(note);
+  }
+
+  /// Reads [file] as UTF-8, or returns null when the bytes are not text.
+  ///
+  /// A NUL byte is the cheap, reliable tell: no text encoding this app cares
+  /// about produces one, and every binary container does within its header.
+  static Future<String?> _readAsTextOrNull(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      if (bytes.contains(0)) return null;
+      return utf8.decode(bytes);
+    } on Object {
+      return null;
+    }
+  }
+
+  static String _extensionLabel(String name) {
+    final ext = p.extension(name).replaceFirst('.', '').toUpperCase();
+    return ext.isEmpty ? 'Fichier' : ext;
+  }
+
+  static String _humanBytes(int size) {
+    if (size < 1024) return '$size o';
+    if (size < 1024 * 1024) return '${(size / 1024).toStringAsFixed(1)} Ko';
+    return '${(size / (1024 * 1024)).toStringAsFixed(1)} Mo';
+  }
+
+  /// Deletes attachment files no note points at any more.
+  ///
+  /// Notes and their bytes are two files, and the trash only moves the first;
+  /// this is what stops the second from accumulating forever. Run from the
+  /// index rebuild, where the vault is being walked anyway.
+  Future<int> purgeOrphanAttachments() async {
+    if (!await attachmentsDir.exists()) return 0;
+
+    final referenced = <String>{};
+    await for (final file in noteFiles()) {
+      try {
+        final (frontmatter, _) = _split(await file.readAsString());
+        if (frontmatter == null) continue;
+        final attachment = _string(_parseYaml(frontmatter)['attachment']);
+        if (attachment != null) referenced.add(p.basename(attachment));
+      } on Object {
+        // An unreadable note is not proof its attachment is unreferenced.
+        return 0;
+      }
+    }
+
+    var removed = 0;
+    await for (final entity in attachmentsDir.list(followLinks: false)) {
+      if (entity is! File) continue;
+      if (referenced.contains(p.basename(entity.path))) continue;
+      await entity.delete();
+      removed++;
+    }
+    return removed;
+  }
+
+  /// Absolute path of a note's attachment, for opening or revealing it.
+  File? attachmentFile(Note note) {
+    final stored = note.attachment;
+    if (stored == null) return null;
+    return File(p.joinAll([root.path, ...p.split(stored)]));
   }
 
   /// Where deleted notes go. Dot-prefixed so [noteFiles] and [listFolders]
@@ -375,6 +512,11 @@ class FileRepository {
       ..writeln('pinned: ${note.pinned}');
 
     if (note.color != null) b.writeln('color: ${_yamlString(note.color!)}');
+    if (note.attachment != null) {
+      b
+        ..writeln('attachment: ${_yamlString(note.attachment!)}')
+        ..writeln('attachment_size: ${note.attachmentBytes}');
+    }
 
     b
       ..writeln(_fence)
@@ -411,6 +553,9 @@ class FileRepository {
     final s = '$value'.trim();
     return s.isEmpty || s == 'null' ? null : s;
   }
+
+  static int? _int(Object? value) =>
+      value is int ? value : int.tryParse('$value'.trim());
 
   static List<String> _stringList(Object? value) {
     if (value is YamlList) {

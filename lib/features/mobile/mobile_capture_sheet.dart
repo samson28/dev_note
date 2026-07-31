@@ -11,6 +11,7 @@ import '../../state/vault_notifier.dart';
 import '../../widgets/jot_icons.dart';
 import '../../widgets/jot_primitives.dart';
 import '../../widgets/type_badge.dart';
+import '../import/file_import.dart';
 
 /// 4d — quick capture on the phone.
 ///
@@ -111,6 +112,22 @@ class _CaptureSheetState extends ConsumerState<_CaptureSheet> {
                 child: Row(
                   children: [
                     const Expanded(child: SectionLabel('Capture rapide')),
+                    // A file is the other thing a person arrives with, so it
+                    // belongs in the same sheet rather than behind a menu.
+                    Hoverable(
+                      onTap: () async {
+                        final navigator = Navigator.of(context);
+                        final count =
+                            await pickAndImportFiles(ref, folder: _folder);
+                        if (count > 0 && mounted) navigator.pop();
+                      },
+                      builder: (context, _) => JotIcon(
+                        JotIcons.import_,
+                        size: 17,
+                        color: JotColors.textDim,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     TypeBadge(type),
                     const SizedBox(width: 10),
                     Hoverable(

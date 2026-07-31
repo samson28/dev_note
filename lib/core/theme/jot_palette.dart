@@ -48,6 +48,7 @@ class JotPalette {
     required this.badgeCode,
     required this.badgeUrl,
     required this.badgeText,
+    required this.badgeFile,
     required this.danger,
   });
 
@@ -83,6 +84,11 @@ class JotPalette {
   final BadgeColors badgeCode;
   final BadgeColors badgeUrl;
   final BadgeColors badgeText;
+
+  /// Imported binaries. Deliberately outside the design's four content
+  /// badges: a PDF is not TXT, JSON, CODE or URL, and colouring it as one of
+  /// them would make the list lie about what opens.
+  final BadgeColors badgeFile;
   final Color danger;
 
   /// Applies the user's accent choice on top of a theme's base palette.
@@ -144,6 +150,7 @@ class JotPalette {
         badgeCode: badgeCode,
         badgeUrl: badgeUrl,
         badgeText: badgeText,
+        badgeFile: badgeFile,
         danger: danger,
       );
 
@@ -192,6 +199,7 @@ class JotPalette {
     badgeCode: BadgeColors(Color(0xFF6D4BB8), Color(0xFFEFEAFB)),
     badgeUrl: BadgeColors(Color(0xFF1F6FCC), Color(0xFFE6F0FC)),
     badgeText: BadgeColors(Color(0xFF5F6169), Color(0xFFECECE8)),
+    badgeFile: BadgeColors(Color(0xFF2F7D6B), Color(0xFFE2F0EC)),
     danger: Color(0xFFC4443C),
   );
 
@@ -224,6 +232,7 @@ class JotPalette {
     badgeCode: BadgeColors(Color(0xFFA78BFA), Color(0x24A78BFA)),
     badgeUrl: BadgeColors(Color(0xFF58A6FF), Color(0x2458A6FF)),
     badgeText: BadgeColors(Color(0xFF8B8D95), Color(0x12FFFFFF)),
+    badgeFile: BadgeColors(Color(0xFF5EC8A8), Color(0x245EC8A8)),
     danger: Color(0xFFE5534B),
   );
 
@@ -262,6 +271,7 @@ class JotPalette {
     badgeCode: BadgeColors(Color(0xFFB79CFB), Color(0x00000000), Color(0xFF2C2350)),
     badgeUrl: BadgeColors(Color(0xFF6FB2FF), Color(0x00000000), Color(0xFF16304F)),
     badgeText: BadgeColors(Color(0xFF9C9CA2), Color(0x00000000), Color(0xFF2A2A2E)),
+    badgeFile: BadgeColors(Color(0xFF74D6B8), Color(0x00000000), Color(0xFF13332B)),
     danger: Color(0xFFF2645B),
   );
 

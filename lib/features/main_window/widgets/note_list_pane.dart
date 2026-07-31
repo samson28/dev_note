@@ -8,7 +8,9 @@ import '../../../core/theme/jot_theme.dart';
 import '../../../core/utils/jot_format.dart';
 import '../../../state/settings_notifier.dart';
 import '../../../state/vault_notifier.dart';
+import '../../../widgets/jot_icons.dart';
 import '../../../widgets/jot_primitives.dart';
+import '../../import/file_import.dart';
 import '../../../widgets/json_viewer.dart' show copyToClipboard;
 import '../../../widgets/note_card.dart';
 import 'note_context_menu.dart';
@@ -70,8 +72,31 @@ class _Header extends ConsumerWidget {
                 ),
               ),
             ),
-            Text('Modifié ▾', style: JotText.ui(size: 11, color: JotColors.textSubtle)),
+            Text('Modifié', style: JotText.ui(size: 11, color: JotColors.textSubtle)),
+            const SizedBox(width: 2),
+            JotIcon(JotIcons.dropdown, size: 12, color: JotColors.textSubtle),
             const SizedBox(width: 10),
+            // Import sits beside "new note" because it is the same intent:
+            // getting something into the vault right now.
+            Hoverable(
+              onTap: () => pickAndImportFiles(ref),
+              builder: (context, hovered) => Container(
+                width: 26,
+                height: 26,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: hovered ? JotColors.neutralWash : null,
+                  border: Border.all(color: JotColors.borderSubtle),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: JotIcon(
+                  JotIcons.import_,
+                  size: 13,
+                  color: JotColors.textBody,
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
             Hoverable(
               onTap: () => ref.read(vaultProvider.notifier).create(),
               builder: (context, hovered) => Container(
@@ -82,13 +107,10 @@ class _Header extends ConsumerWidget {
                   color: hovered ? JotColors.accentHover : JotColors.accent,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(
-                  '+',
-                  style: JotText.ui(
-                    size: 15,
-                    weight: FontWeight.w500,
-                    color: JotColors.onAccent,
-                  ),
+                child: JotIcon(
+                  JotIcons.plus,
+                  size: 15,
+                  color: JotColors.onAccent,
                 ),
               ),
             ),

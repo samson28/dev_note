@@ -7,7 +7,11 @@ enum NoteType {
   text('txt', 'TXT'),
   json('json', 'JSON'),
   code('code', 'CODE'),
-  url('url', 'URL');
+  url('url', 'URL'),
+
+  /// An imported binary the app cannot show inline: the note carries the
+  /// metadata and a pointer, the bytes live in the vault's attachments.
+  file('file', 'FICHIER');
 
   const NoteType(this.id, this.label);
 
@@ -21,6 +25,7 @@ enum NoteType {
     'json' => NoteType.json,
     'code' => NoteType.code,
     'url' => NoteType.url,
+    'file' => NoteType.file,
     _ => NoteType.text,
   };
 
@@ -31,10 +36,11 @@ enum NoteType {
     NoteType.json => JotColors.active.badgeJson,
     NoteType.code => JotColors.active.badgeCode,
     NoteType.url => JotColors.active.badgeUrl,
+    NoteType.file => JotColors.active.badgeFile,
   };
 
   /// Whether the body should be rendered with the monospace face.
-  bool get isMonospace => this != NoteType.text;
+  bool get isMonospace => this != NoteType.text && this != NoteType.file;
 }
 
 /// Best-effort content sniffing, run on every keystroke in quick capture and
@@ -82,6 +88,62 @@ abstract final class NoteTypeDetector {
     }
 
     return NoteType.text;
+  }
+
+  /// The type an imported file should get, from its extension.
+  ///
+  /// Extension first, content second: a `.csv` of pure numbers sniffs as
+  /// prose and a `.sql` one-liner sniffs as code either way, but a file the
+  /// user named `config.yaml` should read as code no matter what is in it.
+  /// Returns null when the extension says nothing, leaving [detect] to decide.
+  static NoteType? fromExtension(String path) {
+    final ext = path.contains('.') ? path.split('.').last.toLowerCase() : '';
+    return switch (ext) {
+      'json' || 'jsonl' || 'geojson' => NoteType.json,
+      'xml' ||
+      'yaml' ||
+      'yml' ||
+      'toml' ||
+      'ini' ||
+      'env' ||
+      'html' ||
+      'htm' ||
+      'css' ||
+      'scss' ||
+      'js' ||
+      'mjs' ||
+      'ts' ||
+      'tsx' ||
+      'jsx' ||
+      'dart' ||
+      'py' ||
+      'rb' ||
+      'php' ||
+      'go' ||
+      'rs' ||
+      'java' ||
+      'kt' ||
+      'swift' ||
+      'c' ||
+      'h' ||
+      'cpp' ||
+      'hpp' ||
+      'cs' ||
+      'sql' ||
+      'sh' ||
+      'bash' ||
+      'ps1' ||
+      'gradle' ||
+      'tf' ||
+      // Not source, but columns only line up in the monospace face, which on
+      // this side of the app is what `code` means.
+      'csv' ||
+      'tsv' ||
+      'log' =>
+        NoteType.code,
+      'txt' || 'md' || 'markdown' || 'rst' => NoteType.text,
+      _ => null,
+    };
   }
 
   static bool _looksLikeJson(String s) =>

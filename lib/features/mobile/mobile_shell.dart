@@ -14,6 +14,7 @@ import '../../widgets/jot_icons.dart';
 import '../../core/models/note_type.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../core/utils/jot_format.dart';
+import '../../state/jot_services.dart';
 import '../../state/vault_notifier.dart';
 import '../../widgets/jot_primitives.dart';
 import '../../widgets/json_viewer.dart' show copyToClipboard;
@@ -419,6 +420,8 @@ class MobileDetailScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
                 child: NoteBody(
                   note: note,
+                  attachmentFile:
+                      ref.read(servicesProvider).files.attachmentFile(note),
                   fontSize: 12,
                   showLineNumbers: false,
                   onChanged: (content) => vault.edit(note.copyWith(content: content)),
