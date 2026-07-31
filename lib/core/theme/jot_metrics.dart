@@ -79,7 +79,7 @@ abstract final class JotMetrics {
     ),
   ];
 
-  /// `0 16px 40px rgba(0,0,0,.6)` — the notification-area menu.
+  /// `0 16px 40px rgba(0,0,0,.6)`, the notification-area menu.
   static const trayShadow = <BoxShadow>[
     BoxShadow(
       color: JotColors.shadowCapture,
@@ -88,7 +88,7 @@ abstract final class JotMetrics {
     ),
   ];
 
-  /// `14px 0 40px rgba(0,0,0,.5)` — the mobile drawer, cast sideways rather
+  /// `14px 0 40px rgba(0,0,0,.5)`, the mobile drawer, cast sideways rather
   /// than down because the panel slides in from the left edge.
   static const drawerShadow = <BoxShadow>[
     BoxShadow(
@@ -98,7 +98,7 @@ abstract final class JotMetrics {
     ),
   ];
 
-  /// `0 18px 50px rgba(0,0,0,.45)` — the light theme casts a softer window
+  /// `0 18px 50px rgba(0,0,0,.45)`, the light theme casts a softer window
   /// shadow than the dark ones, since the surface beneath it is paper.
   static const windowShadowLight = <BoxShadow>[
     BoxShadow(

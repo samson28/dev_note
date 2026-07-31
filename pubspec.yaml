@@ -50,7 +50,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   uuid: ^4.6.0
   lucide_icons_flutter: ^3.1.15
-  # Vendored under packages/ minus its Android half — see that pubspec.
+  # Vendored under packages/ minus its Android half, see that pubspec.
   desktop_drop:
     path: packages/desktop_drop
   url_launcher: ^6.3.2
@@ -88,7 +88,7 @@ flutter:
 
   # JetBrains Mono, bundled so JSON/code/URLs render exactly as designed on
   # every machine rather than falling back to whatever monospace is installed.
-  # SIL Open Font License 1.1 — see assets/fonts/OFL.txt.
+  # SIL Open Font License 1.1, see assets/fonts/OFL.txt.
   # Only the three weights the design actually uses (400/500/600) are shipped.
   fonts:
     - family: JetBrains Mono

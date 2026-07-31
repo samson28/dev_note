@@ -10,7 +10,7 @@ import '../../../widgets/json_viewer.dart' show BlinkingCaret;
 import '../settings_window.dart';
 import '../widgets/settings_controls.dart';
 
-/// 2b — Raccourcis, including the live "press the new combination" state.
+/// 2b, Raccourcis, including the live "press the new combination" state.
 class ShortcutsTab extends ConsumerStatefulWidget {
   const ShortcutsTab({super.key, required this.onDone});
 
@@ -71,7 +71,7 @@ class _ShortcutsTabState extends ConsumerState<ShortcutsTab> {
 
     final label = _labelFor(event.logicalKey);
     if (label == null) {
-      // A bare modifier — keep showing it and wait for the real key.
+      // A bare modifier, keep showing it and wait for the real key.
       setState(() => _held = combo);
       return KeyEventResult.handled;
     }

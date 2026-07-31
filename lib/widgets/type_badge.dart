@@ -132,7 +132,7 @@ class FilterPill extends StatelessWidget {
       );
 }
 
-/// Shared hover/press wrapper — the design has no ripples, just a cursor
+/// Shared hover/press wrapper, the design has no ripples, just a cursor
 /// change and the background swaps the parent already handles.
 class _Pressable extends StatelessWidget {
   const _Pressable({required this.child, required this.onTap});

@@ -30,7 +30,7 @@ import '../core/theme/jot_theme.dart';
 /// Syntax highlighting for `CODE` notes.
 ///
 /// Only a developer-relevant subset of grammars is registered rather than all
-/// 197 — registering the full set costs startup time the capture path cannot
+/// 197, registering the full set costs startup time the capture path cannot
 /// spare, and a note that is not one of these still renders (unhighlighted)
 /// rather than failing.
 abstract final class CodeHighlighter {
@@ -64,8 +64,8 @@ abstract final class CodeHighlighter {
     return h;
   }();
 
-  /// The design's own syntax legend — `clé` / `"texte"` / `1234` / `true` /
-  /// `{ } ,` — mapped onto highlight.js scopes. Everything that is not one of
+  /// The design's own syntax legend, `clé` / `"texte"` / `1234` / `true` /
+  /// `{ } ,`, mapped onto highlight.js scopes. Everything that is not one of
   /// those four roles falls through to the punctuation grey, which is what
   /// keeps a code block reading as the same picture as a JSON block.
   static Map<String, TextStyle> theme(Color baseColor) {

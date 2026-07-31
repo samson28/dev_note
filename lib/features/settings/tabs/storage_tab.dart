@@ -20,7 +20,7 @@ import '../settings_window.dart';
 import '../widgets/settings_controls.dart';
 import '../widgets/vault_change_dialog.dart';
 
-/// 3b — Stockage & sauvegarde.
+/// 3b, Stockage & sauvegarde.
 class StorageTab extends ConsumerStatefulWidget {
   const StorageTab({super.key, required this.onDone});
 
@@ -327,7 +327,7 @@ class _StorageTabState extends ConsumerState<StorageTab> {
   ///
   /// The two answers are genuinely different operations, so the dialog states
   /// both rather than picking one: "déplacer" carries the notes across,
-  /// "utiliser" adopts what is already there — which is the case when a cloud
+  /// "utiliser" adopts what is already there, which is the case when a cloud
   /// client has restored the vault on a second machine.
   Future<void> _changeVault(BuildContext context, WidgetRef ref) async {
     if (_busy != null) return;

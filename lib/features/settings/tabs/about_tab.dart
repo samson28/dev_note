@@ -12,7 +12,7 @@ import '../../../widgets/json_viewer.dart' show copyToClipboard;
 import '../settings_window.dart';
 import '../widgets/settings_controls.dart';
 
-/// 3c — À propos & mises à jour.
+/// 3c, À propos & mises à jour.
 class AboutTab extends ConsumerWidget {
   const AboutTab({super.key});
 

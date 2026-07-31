@@ -59,7 +59,7 @@ class VaultState {
   final List<Folder> folders;
   final List<Tag> tags;
 
-  /// Notes for the current [scope]. Their `content` holds only the preview —
+  /// Notes for the current [scope]. Their `content` holds only the preview -
   /// the full body is loaded on demand into [openNote].
   final List<Note> notes;
   final Scope scope;
@@ -73,7 +73,7 @@ class VaultState {
   /// The most recently touched notes across the whole vault, pinned first.
   ///
   /// Scope-independent on purpose: this feeds the home panel, whose job is to
-  /// answer "what was I doing?" — a question the current folder cannot.
+  /// answer "what was I doing?", a question the current folder cannot.
   final List<Note> recent;
 
   /// Transient, non-blocking message (unreadable file, index rebuilt...).
@@ -108,7 +108,7 @@ class VaultState {
 /// note is written to disk.
 ///
 /// Writes go to the file first and to the index immediately after, rather than
-/// waiting for the watcher — saving must feel instant, and the watcher event
+/// waiting for the watcher, saving must feel instant, and the watcher event
 /// for our own write is suppressed so the work is not done twice.
 class VaultNotifier extends Notifier<VaultState> {
   late final JotServices _services;
@@ -198,7 +198,7 @@ class VaultNotifier extends Notifier<VaultState> {
 
   /// Loads the full body of [note] into the editor.
   Future<void> open_(Note note) async {
-    // Show the row's metadata immediately, then swap in the body once read —
+    // Show the row's metadata immediately, then swap in the body once read -
     // the pane must never flash empty.
     state = state.copyWith(openNote: note);
 
@@ -289,7 +289,7 @@ class VaultNotifier extends Notifier<VaultState> {
     return imported;
   }
 
-  /// Debounced autosave — the design's status bar says "Enregistré
+  /// Debounced autosave, the design's status bar says "Enregistré
   /// automatiquement", so there is no save button to press.
   void edit(Note updated) {
     state = state.copyWith(openNote: updated);
@@ -365,7 +365,7 @@ class VaultNotifier extends Notifier<VaultState> {
 
   /// Moves the vault, or adopts an existing one, and reloads everything.
   ///
-  /// Returns null on success, or the reason it did not happen — which the
+  /// Returns null on success, or the reason it did not happen, which the
   /// caller shows verbatim. A failure here means the notes are still where
   /// they were, which is the only outcome worth guaranteeing.
   Future<String?> changeVault(String? path, {bool move = false}) async {

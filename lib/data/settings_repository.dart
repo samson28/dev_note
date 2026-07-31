@@ -11,7 +11,7 @@ import '../core/models/app_settings.dart';
 ///
 /// Settings are applied immediately (the design's footer says so), so writes
 /// are debounced rather than tied to a Save button, and a failed write never
-/// blocks the UI — the in-memory value stays authoritative for the session.
+/// blocks the UI, the in-memory value stays authoritative for the session.
 class SettingsRepository {
   SettingsRepository(this.file);
 
@@ -32,7 +32,7 @@ class SettingsRepository {
       if (decoded is! Map) return const AppSettings();
       return AppSettings.fromJson(Map<String, dynamic>.from(decoded));
     } on Object catch (e) {
-      debugPrint('Dev Note: réglages illisibles ($e) — valeurs par défaut');
+      debugPrint('Dev Note: réglages illisibles ($e), valeurs par défaut');
       return const AppSettings();
     }
   }

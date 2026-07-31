@@ -6,7 +6,7 @@ export 'jot_palette.dart' show JotPalette, BadgeColors;
 
 /// The active palette, and every token the UI reads.
 ///
-/// These were `static const` while the design had a single theme — which the
+/// These were `static const` while the design had a single theme, which the
 /// compiler enforced nicely. Section 6 added three, so they are now getters
 /// over a swappable [JotPalette]. Call sites are unchanged (`JotColors.accent`
 /// still reads the same); only `const` expressions had to give, which the

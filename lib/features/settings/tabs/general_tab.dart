@@ -12,7 +12,7 @@ import '../../main_window/widgets/prompt_dialog.dart';
 import '../settings_window.dart';
 import '../widgets/settings_controls.dart';
 
-/// 2a — Général : démarrage et contenu.
+/// 2a, Général : démarrage et contenu.
 class GeneralTab extends ConsumerWidget {
   const GeneralTab({super.key, required this.onDone});
 

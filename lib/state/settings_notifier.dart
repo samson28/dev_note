@@ -34,7 +34,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     );
   }
 
-  /// Writes immediately — used when closing the settings window.
+  /// Writes immediately, used when closing the settings window.
   Future<void> flush() async {
     _writeDebounce?.cancel();
     await _services.settings.save(state);

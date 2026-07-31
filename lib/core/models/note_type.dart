@@ -70,7 +70,7 @@ abstract final class NoteTypeDetector {
 
     if (_looksLikeJson(content) && _isValidJson(content)) return NoteType.json;
 
-    // A URL only counts when it is the *whole* note — a link inside a
+    // A URL only counts when it is the *whole* note, a link inside a
     // paragraph is still text.
     if (!content.contains(RegExp(r'\s')) && _urlPattern.hasMatch(content)) {
       return NoteType.url;

@@ -52,7 +52,7 @@ class IndexRepository {
   final JotDatabase db;
   final FileRepository files;
 
-  /// How long the last full rebuild took — shown in the palette footer.
+  /// How long the last full rebuild took, shown in the palette footer.
   Duration? lastRebuild;
 
   // ------------------------------------------------------------------- sync
@@ -79,7 +79,7 @@ class IndexRepository {
       if (!force && row != null) {
         final stat = await file.stat();
         // Compare against the filesystem metadata we recorded, not the
-        // frontmatter's `modified` — our own writes always bump the file's
+        // frontmatter's `modified`, our own writes always bump the file's
         // mtime past it, which would make every file look dirty forever.
         final unchanged = stat.modified == row.fileModified &&
             stat.size == row.fileSize;
@@ -130,8 +130,8 @@ class IndexRepository {
     await db.transaction(() async {
       // `relative_path` carries a UNIQUE index, but the upsert below resolves
       // conflicts on `id`. A note recreated at a path a *different* id once
-      // held — a rename that slugifies the same, a deleted-then-restored
-      // file — would otherwise trip the index instead of replacing the row.
+      // held, a rename that slugifies the same, a deleted-then-restored
+      // file, would otherwise trip the index instead of replacing the row.
       await (db.delete(db.noteRows)
             ..where((t) =>
                 t.relativePath.equals(note.relativePath) & t.id.equals(note.id).not()))
@@ -277,8 +277,8 @@ class IndexRepository {
   /// Full-text search over title, body and tags.
   ///
   /// FTS5 handles the token/prefix matching (fast, ranked). Because developers
-  /// habitually search for a fragment *inside* an identifier — `hook` to find
-  /// `webhook_failed` — the FTS pass is topped up with a substring scan, which
+  /// habitually search for a fragment *inside* an identifier, `hook` to find
+  /// `webhook_failed`, the FTS pass is topped up with a substring scan, which
   /// tokenised search structurally cannot answer. The two are merged with FTS
   /// hits first, since those are the better matches.
   Future<List<SearchHit>> search(
@@ -337,7 +337,7 @@ LIMIT ?
       ).get();
       return rows.map(_fromQueryRow).toList();
     } on Object {
-      // A malformed MATCH expression must not break the search box — fall
+      // A malformed MATCH expression must not break the search box, fall
       // through to the substring pass instead.
       return const [];
     }

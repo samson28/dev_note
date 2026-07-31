@@ -14,7 +14,7 @@ import 'mobile_appearance.dart';
 import 'mobile_subscreens.dart';
 import 'mobile_trash.dart';
 
-/// 4a — Réglages, racine.
+/// 4a, Réglages, racine.
 ///
 /// The desktop window puts six tabs side by side; the phone turns the same
 /// content into a stack of 48px rows that push a subscreen. Values sit on the

@@ -21,8 +21,8 @@ import 'state/jot_services.dart';
 ///
 /// * The **main window** boots the vault, the index and the watcher, then
 ///   shows the three columns (or the mobile stack).
-/// * The **capture window** stays deliberately thin — no index, no watcher,
-///   it only writes a file — so it can appear in a fraction of a second,
+/// * The **capture window** stays deliberately thin, no index, no watcher,
+///   it only writes a file, so it can appear in a fraction of a second,
 ///   which is the entire reason it exists.
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -95,7 +95,7 @@ Future<bool> _isQuickCaptureEngine() async {
 /// Watches the theme and accent settings, swaps the palette, and rebuilds.
 ///
 /// This is the piece that makes theme switching real: [JotColors] is a set of
-/// getters over a mutable palette, so changing it is only half the job — the
+/// getters over a mutable palette, so changing it is only half the job, the
 /// tree also has to be rebuilt, which happens because this widget watches the
 /// two settings that feed [JotPalette.resolve].
 class JotApp extends ConsumerWidget {
@@ -145,10 +145,10 @@ class JotApp extends ConsumerWidget {
       theme: JotTheme.build(),
       // The palette is a mutable global, so swapping it marks nothing dirty:
       // Flutter would rebuild some widgets and leave others painted in the old
-      // theme — a half-updated frame. Keying the subtree on the palette forces
+      // theme, a half-updated frame. Keying the subtree on the palette forces
       // the whole thing to be rebuilt at once. Widget State is discarded, but
       // the selection and scope live in Riverpod, so only scroll position is
-      // lost — a fair price on an explicit theme change.
+      // lost, a fair price on an explicit theme change.
       home: KeyedSubtree(
         key: ValueKey('${JotColors.active.id}:${JotColors.accent.toARGB32()}'),
         child: desktop ? const MainWindowScreen() : const MobileShell(),

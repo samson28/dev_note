@@ -123,7 +123,7 @@ void main() {
           .writeAsString('---\n: : : pas du yaml\n---\ncorps');
 
       final notes = await files.readAll();
-      // The broken file either parses loosely or is skipped — either way the
+      // The broken file either parses loosely or is skipped, either way the
       // good note must still come back.
       expect(notes.map((n) => n.title), contains('lisible'));
     });
@@ -354,7 +354,7 @@ void main() {
     });
 
     test('the extension wins over content sniffing', () async {
-      // Valid JSON, but the user called it .xml — trust the name.
+      // Valid JSON, but the user called it .xml, trust the name.
       final xml = at('config.xml')..writeAsStringSync('{"a": 1}');
       expect((await files.importFile(xml)).type, NoteType.code);
 
@@ -416,7 +416,7 @@ void main() {
         at('jette.pdf')..writeAsBytesSync([0x00, 2]),
       );
 
-      // Remove the note but not its bytes — what the trash does.
+      // Remove the note but not its bytes, what the trash does.
       await File('${root.path}/${dropped.relativePath}').delete();
 
       expect(await files.purgeOrphanAttachments(), 1);

@@ -28,7 +28,7 @@ enum SettingsTab {
   final String label;
 }
 
-/// Réglages — 980px wide, left nav + right content, exactly like the main
+/// Réglages, 980px wide, left nav + right content, exactly like the main
 /// window's grammar.
 ///
 /// Shown as an overlay inside the main window rather than a second OS window:

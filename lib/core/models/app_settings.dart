@@ -224,7 +224,7 @@ class AppSettings {
   /// Where the notes live, when the user has moved them off the default.
   ///
   /// Null means `~/JotVault`. Made configurable so the vault can sit inside a
-  /// folder that Google Drive, OneDrive or Dropbox already synchronises —
+  /// folder that Google Drive, OneDrive or Dropbox already synchronises -
   /// which is continuous, versioned backup for no code and no account.
   final String? vaultPath;
   final bool autoDetectType;
@@ -273,7 +273,7 @@ class AppSettings {
     ShortcutAction.deleteNote: KeyCombo(key: '⌫', ctrl: true),
   };
 
-  /// Actions whose combination collides with another action's — the design
+  /// Actions whose combination collides with another action's, the design
   /// surfaces these in red and counts them in the footer.
   Set<ShortcutAction> get conflicts {
     final seen = <KeyCombo, ShortcutAction>{};

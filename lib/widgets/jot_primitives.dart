@@ -66,8 +66,8 @@ class Keycap extends StatelessWidget {
 ///
 /// Removal is deliberately *not* bound to a bare tap on the chip: an
 /// accidental click would silently drop a tag, and the note list uses tags to
-/// find things again. Instead a `✕` appears on hover — the same
-/// `#api ✕` shape the design uses for the palette's active filters — and only
+/// find things again. Instead a `✕` appears on hover, the same
+/// `#api ✕` shape the design uses for the palette's active filters, and only
 /// that hit target removes.
 class TagChip extends StatelessWidget {
   const TagChip(

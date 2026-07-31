@@ -61,7 +61,7 @@ abstract final class JotFormat {
   static String absolute(DateTime when) =>
       '${when.day} ${_months[when.month - 1]} ${_clock(when)}';
 
-  /// "1,42 Ko" — French decimal comma, binary-free kilobytes as the design
+  /// "1,42 Ko", French decimal comma, binary-free kilobytes as the design
   /// shows them.
   static String bytes(int size) {
     if (size < 1000) return '$size o';

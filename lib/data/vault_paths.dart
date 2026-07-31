@@ -20,14 +20,14 @@ abstract final class VaultPaths {
   static const settingsFileName = 'settings.json';
 
   /// True when [vault] had to create the directory, i.e. this is a brand-new
-  /// install. Used to decide whether to drop in the example notes — it can
+  /// install. Used to decide whether to drop in the example notes, it can
   /// never be true for a vault that already holds the user's own files.
   static bool createdThisLaunch = false;
 
   /// The vault root, created on first access.
   ///
   /// [override] is the user's chosen location, when they have moved the vault
-  /// off the default — typically into a folder their cloud client already
+  /// off the default, typically into a folder their cloud client already
   /// synchronises. It is used as given: the folder they picked *is* the vault,
   /// not its parent, so nothing appears nested a level deeper than expected.
   static Future<Directory> vault({String? override}) async {
@@ -84,7 +84,7 @@ abstract final class VaultPaths {
   /// behind. The index is not migrated: it is a cache and rebuilds itself in
   /// milliseconds, so copying it would only risk carrying a stale one over.
   ///
-  /// Runs once — as soon as settings exist under the new name, there is
+  /// Runs once, as soon as settings exist under the new name, there is
   /// nothing to do and this costs a single stat call.
   static Future<bool> migrateLegacySupportDirectory() async {
     if (!Platform.isWindows) return false;

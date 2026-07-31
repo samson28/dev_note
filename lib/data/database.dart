@@ -7,14 +7,14 @@ part 'database.g.dart';
 
 /// Mirror of the note metadata needed to render a list row without touching
 /// the disk. The body itself lives only in the FTS table (and, of course, in
-/// the file) — the list never needs it.
+/// the file), the list never needs it.
 class NoteRows extends Table {
   TextColumn get id => text()();
   TextColumn get title => text()();
   TextColumn get type => text()();
   TextColumn get folder => text()();
 
-  /// Space-separated, `#`-free, lowercased — cheap to `LIKE` against.
+  /// Space-separated, `#`-free, lowercased, cheap to `LIKE` against.
   TextColumn get tags => text().withDefault(const Constant(''))();
   TextColumn get preview => text().withDefault(const Constant(''))();
   TextColumn get relativePath => text()();
@@ -52,7 +52,7 @@ class JotDatabase extends _$JotDatabase {
   int get schemaVersion => 2;
 
   /// FTS5 is created with raw SQL because drift models it as an external
-  /// virtual table. `note_id` is UNINDEXED — it is a join key, not something
+  /// virtual table. `note_id` is UNINDEXED, it is a join key, not something
   /// anyone searches for.
   static const _createFts = '''
 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
@@ -85,7 +85,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
         },
         beforeOpen: (details) async {
           // The index is a disposable cache. If the FTS table is missing or
-          // unreadable — hand-deleted, half-written, corrupted — recreate the
+          // unreadable, hand-deleted, half-written, corrupted, recreate the
           // shell here and let IndexRepository refill it from the vault.
           if (!await _ftsIsHealthy()) {
             await customStatement('DROP TABLE IF EXISTS notes_fts');

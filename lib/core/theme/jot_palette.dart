@@ -8,12 +8,12 @@ import '../models/app_settings.dart';
 ///
 ///  * **Une seule couche de couleur change.** The six surface tokens and the
 ///    five syntax tokens permute. No geometry, size or spacing moves between
-///    themes — which is why [JotMetrics] and [JotText] are untouched by this.
+///    themes, which is why [JotMetrics] and [JotText] are untouched by this.
 ///  * **Élévation selon le thème.** Clair and Anthracite use shadows; OLED uses
 ///    hairlines only, because a card on pure black cannot cast a visible
 ///    shadow. [elevated] carries that switch.
 ///  * **Suivre le système** is on by default (clair by day, anthracite by
-///    night). OLED is always an explicit choice, never automatic — see
+///    night). OLED is always an explicit choice, never automatic, see
 ///    [resolve].
 @immutable
 class JotPalette {
@@ -156,7 +156,7 @@ class JotPalette {
 
   /// Picks the palette for the current settings and platform brightness.
   ///
-  /// "Le mode OLED reste un choix explicite, jamais automatique" — following
+  /// "Le mode OLED reste un choix explicite, jamais automatique", following
   /// the system only ever chooses between Clair and Anthracite, even if the
   /// user last picked OLED by hand.
   static JotPalette resolve(AppSettings settings, Brightness systemBrightness) {
@@ -286,13 +286,13 @@ class JotPalette {
   //
   // Anthracite keeps the exact values from screens 1a–3d. Light follows the
   // 2c thumbnail (sidebar EAEAE6, list F0F0ED) reconciled with 6a's rendered
-  // values. OLED collapses every surface to black, per "aucune carte grise" —
+  // values. OLED collapses every surface to black, per "aucune carte grise" -
   // the separation is the hairline, not a shade.
 
   bool get _oled => id == 'oled';
   bool get _light => id == 'light';
 
-  /// Title bar and sidebar — the darkest chrome.
+  /// Title bar and sidebar, the darkest chrome.
   Color get chrome => _oled
       ? const Color(0xFF000000)
       : (_light ? const Color(0xFFEFEFEC) : const Color(0xFF131417));
@@ -380,7 +380,7 @@ class JotPalette {
       : (_light ? const Color(0xFFC6C6BE) : const Color(0xFF3A3C43));
 
   /// Neutral overlay used for hover / wash states. White on dark, black on
-  /// light — a white wash on a white surface is invisible.
+  /// light, a white wash on a white surface is invisible.
   Color overlay(double opacity) => _light
       ? Color.fromRGBO(0, 0, 0, opacity)
       : Color.fromRGBO(255, 255, 255, opacity);
@@ -411,7 +411,7 @@ class JotPalette {
   }
 }
 
-/// Foreground / background pair for a type badge, plus an optional outline —
+/// Foreground / background pair for a type badge, plus an optional outline -
 /// OLED draws badges as outlines instead of fills.
 @immutable
 class BadgeColors {

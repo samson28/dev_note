@@ -8,7 +8,7 @@ import 'type_badge.dart';
 
 /// A row in the desktop note list (middle column).
 ///
-/// Design: `padding:11px 14px 12px`, three stacked lines separated by 6px —
+/// Design: `padding:11px 14px 12px`, three stacked lines separated by 6px -
 /// title (+ pin or the `···` menu affordance), a monospace preview, then the
 /// meta line carrying the type badge, the timestamp and the first tag.
 class NoteListRow extends StatelessWidget {

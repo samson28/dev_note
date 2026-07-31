@@ -226,7 +226,7 @@ class _Group {
   final List<Note> notes;
 }
 
-/// "« Klém » est vide" — the design's empty-folder state.
+/// "« Klém » est vide", the design's empty-folder state.
 class _EmptyScope extends ConsumerWidget {
   const _EmptyScope({required this.scope});
 

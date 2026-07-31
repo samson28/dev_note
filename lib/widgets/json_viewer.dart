@@ -89,7 +89,7 @@ class JsonViewerState extends State<JsonViewer> {
 
   static void _collectBranchPaths(Object? node, String path, Set<String> into) {
     if (node is Map) {
-      // The root stays open — collapsing it would leave a single "{ ... }".
+      // The root stays open, collapsing it would leave a single "{ ... }".
       if (path != '\$') into.add(path);
       for (final entry in node.entries) {
         _collectBranchPaths(entry.value, '$path.${entry.key}', into);
@@ -286,7 +286,7 @@ class _Row {
 
   final int depth;
 
-  /// Path of the branch this row visually belongs to — drives the hover band.
+  /// Path of the branch this row visually belongs to, drives the hover band.
   final String ownerPath;
 
   final String? key;
@@ -488,7 +488,7 @@ class _RawText extends StatelessWidget {
 }
 
 /// `@keyframes caret { 0%,49%{opacity:1} 50%,100%{opacity:0} }` at 1.1s,
-/// stepped — so it snaps rather than fades.
+/// stepped, so it snaps rather than fades.
 class BlinkingCaret extends StatefulWidget {
   const BlinkingCaret({super.key, this.height = 13, this.width = 1.5});
 
@@ -502,7 +502,7 @@ class BlinkingCaret extends StatefulWidget {
 /// A timer rather than an [AnimationController].
 ///
 /// The value consumed here is binary, so a ticker rebuilt this widget sixty
-/// times a second to produce two changes per cycle — and the animated
+/// times a second to produce two changes per cycle, and the animated
 /// [Opacity] forced a `saveLayer` on every one of those frames, forever, in
 /// both the JSON viewer and the shortcut capture field.
 class _BlinkingCaretState extends State<BlinkingCaret> {
@@ -608,6 +608,6 @@ class _HeaderAction extends StatelessWidget {
       );
 }
 
-/// Copies [text] to the clipboard — used by every "Copier" affordance.
+/// Copies [text] to the clipboard, used by every "Copier" affordance.
 Future<void> copyToClipboard(String text) =>
     Clipboard.setData(ClipboardData(text: text));

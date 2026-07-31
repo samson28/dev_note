@@ -6,8 +6,8 @@ import '../data/file_repository.dart';
 /// mock content.
 ///
 /// This runs only when `~/JotVault/` did not exist, so it can never touch an
-/// existing set of notes. It exists so the first launch shows a working app —
-/// grouping, badges, syntax colours and search all have something to chew on —
+/// existing set of notes. It exists so the first launch shows a working app -
+/// grouping, badges, syntax colours and search all have something to chew on -
 /// instead of four empty columns.
 abstract final class SampleNotes {
   static Future<void> seed(FileRepository files) async {

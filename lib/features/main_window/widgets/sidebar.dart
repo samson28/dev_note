@@ -196,7 +196,7 @@ class _SidebarState extends ConsumerState<Sidebar> {
       barrierColor: JotColors.scrim,
       builder: (_) => const PromptDialog(
         title: 'Nouveau dossier',
-        // A slash makes a sub-folder, which is how the tree is created —
+        // A slash makes a sub-folder, which is how the tree is created -
         // there is no second dialog for nesting.
         hint: 'Nom, ou Parent/Enfant',
         confirmLabel: 'Créer',
@@ -281,11 +281,11 @@ class _FolderRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             // Two things this Stack has to get right:
-            //  * the 2px accent edge sits inside the row's own bounds — Stack
+            //  * the 2px accent edge sits inside the row's own bounds, Stack
             //    clips to its size, so a negative offset would draw nothing;
             //  * `alignment` must centre the content, because a Stack aligns
             //    non-positioned children to topStart by default and the row
-            //    is 30px tall — leaving the label and counter floating above
+            //    is 30px tall, leaving the label and counter floating above
             //    the accent edge, which is centred by its own insets.
             child: Stack(
               alignment: Alignment.centerLeft,

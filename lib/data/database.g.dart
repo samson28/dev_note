@@ -390,7 +390,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   final String type;
   final String folder;
 
-  /// Space-separated, `#`-free, lowercased — cheap to `LIKE` against.
+  /// Space-separated, `#`-free, lowercased, cheap to `LIKE` against.
   final String tags;
   final String preview;
   final String relativePath;

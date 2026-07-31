@@ -16,7 +16,7 @@ import 'sample_notes.dart';
 
 /// Everything the app needs from the disk, wired together once at startup.
 ///
-/// Built before `runApp` so the first frame already has a warm index — the
+/// Built before `runApp` so the first frame already has a warm index, the
 /// window must be usable the instant it appears.
 class JotServices {
   JotServices({
@@ -31,7 +31,7 @@ class JotServices {
   /// Not final, and deliberately so: [switchVault] rebuilds the data layer in
   /// place. Everything in the app holds this one [JotServices] instance and
   /// reads through it, so replacing the pieces here is what lets the vault
-  /// move without a relaunch — and without turning a service locator into
+  /// move without a relaunch, and without turning a service locator into
   /// something every call site has to watch.
   FileRepository files;
   JotDatabase db;
@@ -80,8 +80,8 @@ class JotServices {
     );
   }
 
-  /// Opens the index, and if anything about it is unusable — missing columns,
-  /// a truncated file, a half-written page — deletes it and builds a fresh one
+  /// Opens the index, and if anything about it is unusable, missing columns,
+  /// a truncated file, a half-written page, deletes it and builds a fresh one
   /// from the vault.
   ///
   /// The files on disk are the only source of truth, so a broken cache is

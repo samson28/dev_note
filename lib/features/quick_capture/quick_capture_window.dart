@@ -17,14 +17,14 @@ import '../main_window/widgets/prompt_dialog.dart';
 ///
 /// Everything here is tuned for the few seconds it is meant to exist: it opens
 /// focused, detects the content type as you type, saves on ⏎ and dismisses
-/// itself. No confirmation, no dialogs — Esc throws the draft away.
+/// itself. No confirmation, no dialogs, Esc throws the draft away.
 ///
 /// It knows nothing about *how* it is hosted: the same widget backs the
 /// separate OS window and the in-app fallback overlay.
 class QuickCaptureWindow extends StatefulWidget {
   const QuickCaptureWindow({super.key, required this.onDismiss, this.onSaved});
 
-  /// Closes the host — the OS window, or the overlay.
+  /// Closes the host, the OS window, or the overlay.
   final Future<void> Function() onDismiss;
 
   /// Lets an in-app host refresh its list without waiting for the watcher.
@@ -114,7 +114,7 @@ class _QuickCaptureWindowState extends State<QuickCaptureWindow> {
     try {
       // The capture window runs in its own engine, so it writes the file
       // directly. The main window's watcher picks it up and indexes it within
-      // ~220 ms — no cross-window plumbing needed.
+      // ~220 ms, no cross-window plumbing needed.
       final files = await FileRepository.open();
       await files.create(
         content: content,
@@ -140,7 +140,7 @@ class _QuickCaptureWindowState extends State<QuickCaptureWindow> {
         _focus.requestFocus();
       }
     } on Object catch (e) {
-      // Never lose what the user typed — keep the window open with the text
+      // Never lose what the user typed, keep the window open with the text
       // intact and say what went wrong.
       if (mounted) {
         setState(() {
@@ -167,7 +167,7 @@ class _QuickCaptureWindowState extends State<QuickCaptureWindow> {
       final pressed = HardwareKeyboard.instance.logicalKeysPressed;
       final newline = pressed.contains(LogicalKeyboardKey.shiftLeft) ||
           pressed.contains(LogicalKeyboardKey.shiftRight);
-      // Shift+Enter inserts a newline; plain Enter saves — multi-line pastes
+      // Shift+Enter inserts a newline; plain Enter saves, multi-line pastes
       // still work because a paste is not a key press.
       if (!newline) {
         _save();

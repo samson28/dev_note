@@ -20,7 +20,7 @@ class QuickCaptureWindowHost extends StatelessWidget {
 }
 
 /// Fallback host, layered inside the main window when a separate OS window is
-/// not available. Same panel, same keys, same 540px — only the frame differs.
+/// not available. Same panel, same keys, same 540px, only the frame differs.
 class QuickCaptureOverlay extends StatelessWidget {
   const QuickCaptureOverlay({super.key, required this.onDismiss, this.onSaved});
 

@@ -78,7 +78,7 @@ class VaultChangeDialog extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Déplacer copie vos notes actuelles ici, puis vide '
-                  "l'ancien dossier — et seulement une fois la copie vérifiée. "
+                  "l'ancien dossier, et seulement une fois la copie vérifiée. "
                   'Utiliser laisse les deux dossiers intacts et travaille '
                   'désormais dans celui-ci.',
                   style: JotText.ui(

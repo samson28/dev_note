@@ -14,8 +14,8 @@ Un webhook à relire, une clé d'API de staging, un bout de SQL qui a marché un
 
 Dev Note tient sur deux promesses et refuse tout ce qui les ralentit :
 
-- **Écrire vite** — un raccourci global ouvre une fenêtre de capture par-dessus n'importe quelle application. Coller, fermer. Rien à ranger, rien à nommer : le titre et le type sont déduits.
-- **Retrouver vite** — `Ctrl K` cherche dans le corps de toutes les notes, pas dans un aperçu tronqué. Les badges de type et la coloration syntaxique font le reste à l'œil.
+- **Écrire vite**, un raccourci global ouvre une fenêtre de capture par-dessus n'importe quelle application. Coller, fermer. Rien à ranger, rien à nommer : le titre et le type sont déduits.
+- **Retrouver vite**, `Ctrl K` cherche dans le corps de toutes les notes, pas dans un aperçu tronqué. Les badges de type et la coloration syntaxique font le reste à l'œil.
 
 Ces deux exigences ont tranché tous les arbitrages : pas de confirmation superflue, pas de dialogue bloquant, les erreurs de fichiers passent par un bandeau discret plutôt qu'une modale.
 
@@ -23,29 +23,29 @@ Ces deux exigences ont tranché tous les arbitrages : pas de confirmation superf
 
 **Vos notes sont des fichiers `.md` en clair.** Un fichier par note, frontmatter YAML en tête, contenu brut dessous. Lisibles avec `cat`, versionnables avec git, éditables avec n'importe quoi. L'index SQLite n'est qu'un cache : supprimez-le, il se reconstruit depuis les fichiers.
 
-**La recherche est un vrai moteur.** SQLite FTS5, et non un filtre sur ce qui est déjà à l'écran — sur desktop comme sur mobile.
+**La recherche est un vrai moteur.** SQLite FTS5, et non un filtre sur ce qui est déjà à l'écran, sur desktop comme sur mobile.
 
 **L'application ne contacte aucun serveur.** Pas de compte, pas de télémétrie, pas de synchronisation. Ce qui est sur votre disque y reste.
 
 ## Fonctionnalités
 
-**Capture** — fenêtre dédiée sur raccourci global, pré-remplissage depuis le presse-papier, dossier de destination configurable, fermeture automatique après enregistrement.
+**Capture** : fenêtre dédiée sur raccourci global, pré-remplissage depuis le presse-papier, dossier de destination configurable, fermeture automatique après enregistrement.
 
-**Types** — `TXT`, `JSON`, `CODE`, `URL`, plus `FICHIER` pour les pièces jointes. Détection à la frappe, surchargeable à la main. Le JSON se plie et se déplie par nœud, le code est coloré.
+**Types** : `TXT`, `JSON`, `CODE`, `URL`, plus `FICHIER` pour les pièces jointes. Détection à la frappe, surchargeable à la main. Le JSON se plie et se déplie par nœud, le code est coloré.
 
-**Import de fichiers** — glissez-les sur la fenêtre, ou passez par le sélecteur, plusieurs à la fois. Tout ce qui est du texte (JSON, CSV, XML, YAML, code, logs) devient une note dont le contenu est **indexé et cherchable**. Le reste — PDF, binaires — est copié dans le coffre et référencé. Dans les deux cas, « Enregistrer sous » vous rend le fichier sous son nom d'origine.
+**Import de fichiers** : glissez-les sur la fenêtre, ou passez par le sélecteur, plusieurs à la fois. Tout ce qui est du texte (JSON, CSV, XML, YAML, code, logs) devient une note dont le contenu est **indexé et cherchable**. Le reste, PDF, binaires, est copié dans le coffre et référencé. Dans les deux cas, « Enregistrer sous » vous rend le fichier sous son nom d'origine.
 
-**Organisation** — dossiers imbriqués, tags, épinglage, corbeille avec restauration et purge automatique. Un dossier parent affiche et compte ce qu'il contient, sous-dossiers compris.
+**Organisation** : dossiers imbriqués, tags, épinglage, corbeille avec restauration et purge automatique. Un dossier parent affiche et compte ce qu'il contient, sous-dossiers compris.
 
-**Apparence** — trois thèmes (Anthracite, Noir profond, Clair), suivi du système, cinq accents, taille de texte réglable. Changement instantané.
+**Apparence** : trois thèmes (Anthracite, Noir profond, Clair), suivi du système, cinq accents, taille de texte réglable. Changement instantané.
 
 ## Sauvegarde
 
 Il n'y a pas d'intégration Google Drive, et c'est délibéré : **l'emplacement du coffre est configurable**.
 
-Réglages → Stockage → Emplacement → *Changer…*, et pointez-le dans un dossier que Google Drive, OneDrive ou Dropbox synchronise déjà. Vous obtenez une sauvegarde continue et versionnée, avec restauration par l'interface de votre fournisseur — sans compte à connecter, sans OAuth, sans rien à maintenir ici.
+Réglages → Stockage → Emplacement → *Changer…*, et pointez-le dans un dossier que Google Drive, OneDrive ou Dropbox synchronise déjà. Vous obtenez une sauvegarde continue et versionnée, avec restauration par l'interface de votre fournisseur, sans compte à connecter, sans OAuth, sans rien à maintenir ici.
 
-Deux options au moment du changement : **déplacer** vos notes vers le nouveau dossier (l'ancien n'est vidé qu'une fois la copie vérifiée fichier par fichier), ou **utiliser** un dossier existant tel quel — ce qu'il faut quand votre client cloud a déjà restauré le coffre sur une autre machine.
+Deux options au moment du changement : **déplacer** vos notes vers le nouveau dossier (l'ancien n'est vidé qu'une fois la copie vérifiée fichier par fichier), ou **utiliser** un dossier existant tel quel, ce qu'il faut quand votre client cloud a déjà restauré le coffre sur une autre machine.
 
 ## Raccourcis
 
@@ -53,9 +53,9 @@ Tous remappables dans Réglages → Raccourcis.
 
 | | |
 |---|---|
-| `Ctrl Alt N` | capture rapide — global, fonctionne hors de l'application |
-| `Ctrl Alt V` | coller le presse-papier en note — global |
-| `Ctrl Maj J` | afficher / masquer la fenêtre — global |
+| `Ctrl Alt N` | capture rapide, global, fonctionne hors de l'application |
+| `Ctrl Alt V` | coller le presse-papier en note, global |
+| `Ctrl Maj J` | afficher / masquer la fenêtre, global |
 | `Ctrl K` | palette de recherche |
 | `Ctrl N` | nouvelle note |
 | `Ctrl P` | épingler |
@@ -84,11 +84,11 @@ Un `.md` déposé à la main sans frontmatter est lu quand même : le titre vien
 
 Deux dossiers cachés à la racine : `.trash/` pour les notes supprimées en attente de purge, `.attachments/` pour les binaires importés. Ni l'un ni l'autre n'apparaît comme dossier dans l'application.
 
-Au premier lancement — et uniquement si le coffre n'existait pas — quelques notes d'exemple sont créées.
+Au premier lancement, et uniquement si le coffre n'existait pas, quelques notes d'exemple sont créées.
 
 ## Recherche
 
-Une base SQLite (`drift`) avec une table FTS5, tenue à jour par un `watcher` sur le coffre. Toute création, modification ou suppression de fichier — y compris depuis un autre éditeur — met l'index à jour en ~220 ms.
+Une base SQLite (`drift`) avec une table FTS5, tenue à jour par un `watcher` sur le coffre. Toute création, modification ou suppression de fichier, y compris depuis un autre éditeur, met l'index à jour en ~220 ms.
 
 La requête combine deux passes :
 
@@ -97,7 +97,7 @@ La requête combine deux passes :
 
 Il n'y a **pas de debounce** sur la frappe : sur quelques centaines de notes la requête coûte quelques millisecondes, et attendre 150 ms est exactement la friction que cette application existe pour supprimer.
 
-Si l'index est absent, corrompu ou d'un schéma périmé, il est supprimé et reconstruit intégralement — un cache cassé n'est jamais une raison de faire échouer un démarrage.
+Si l'index est absent, corrompu ou d'un schéma périmé, il est supprimé et reconstruit intégralement, un cache cassé n'est jamais une raison de faire échouer un démarrage.
 
 ## Compiler
 
@@ -151,7 +151,7 @@ flutter run -d windows --dart-define=JOT_FORCE_MOBILE=true
 | Zone de notification | `features/tray/` |
 | Import / export | `features/import/` |
 
-La capture rapide est une vraie fenêtre système (`desktop_multi_window`) avec son propre moteur Flutter : elle n'a besoin ni de l'index ni du watcher, elle écrit un fichier et se ferme. Si la plateforme refuse de créer la fenêtre, l'application bascule sur un panneau interne — la capture est la seule chose qui ne doit jamais être indisponible.
+La capture rapide est une vraie fenêtre système (`desktop_multi_window`) avec son propre moteur Flutter : elle n'a besoin ni de l'index ni du watcher, elle écrit un fichier et se ferme. Si la plateforme refuse de créer la fenêtre, l'application bascule sur un panneau interne, la capture est la seule chose qui ne doit jamais être indisponible.
 
 Le thème vient de `core/theme/` : `jot_palette.dart` porte les trois palettes, `jot_colors.dart` expose la palette active, `jot_metrics.dart` les dimensions. JetBrains Mono est embarquée (SIL OFL 1.1, voir `assets/fonts/OFL.txt`) pour que le JSON et le code s'affichent à l'identique partout.
 
@@ -177,6 +177,6 @@ Les tests portent volontairement sur la couche qui touche vos fichiers : import,
 
 ## Licence
 
-MIT — voir [LICENSE](LICENSE).
+MIT, voir [LICENSE](LICENSE).
 
 JetBrains Mono est distribuée sous SIL Open Font License 1.1 (`assets/fonts/OFL.txt`), les icônes Lucide sous ISC, et `packages/desktop_drop/` reste sous la licence MIT de son auteur d'origine.

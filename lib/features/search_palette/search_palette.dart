@@ -20,7 +20,7 @@ import '../main_window/widgets/prompt_dialog.dart';
 /// The Ctrl K overlay: a blurred scrim over the window and a 760px card pinned
 /// 96px from the top.
 ///
-/// Results refresh on every keystroke with no debounce — see [SearchNotifier].
+/// Results refresh on every keystroke with no debounce, see [SearchNotifier].
 class SearchPalette extends ConsumerStatefulWidget {
   const SearchPalette({super.key});
 
@@ -499,7 +499,7 @@ class _ResultRow extends StatelessWidget {
   }
 }
 
-/// "Aucun résultat pour « ... »" — offers the two fastest ways out: drop the
+/// "Aucun résultat pour « ... »", offers the two fastest ways out: drop the
 /// filters, or turn the query straight into a note.
 class _PaletteEmpty extends ConsumerWidget {
   const _PaletteEmpty({required this.state, required this.onCreate});

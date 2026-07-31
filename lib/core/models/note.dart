@@ -49,7 +49,7 @@ class Note {
   /// current screens but round-tripped so hand-edited files keep it.
   final String? color;
 
-  /// Byte size of the body — what the status bar reports.
+  /// Byte size of the body, what the status bar reports.
   final int sizeBytes;
 
   /// Filesystem mtime/size as last seen on disk. Only the index uses these,
@@ -66,8 +66,8 @@ class Note {
   /// Name of the file this note was imported from, kept so it can be handed
   /// back unchanged.
   ///
-  /// A flat file is inlined at import — its text becomes the body, which is
-  /// what makes it searchable — and with it the extension would be gone. That
+  /// A flat file is inlined at import, its text becomes the body, which is
+  /// what makes it searchable, and with it the extension would be gone. That
   /// is fine until the user wants the file back: `ventes_q1` is not a CSV, and
   /// guessing `.txt` from the note type would hand them something their
   /// spreadsheet refuses to open.
@@ -94,7 +94,7 @@ class Note {
     return name.split('.').last.toUpperCase();
   }
 
-  /// The body collapsed onto a single line — this is what the note list and
+  /// The body collapsed onto a single line, this is what the note list and
   /// palette show under the title.
   ///
   /// Deliberately not "the first line": a pretty-printed JSON note's first

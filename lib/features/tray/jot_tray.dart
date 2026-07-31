@@ -6,7 +6,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../quick_capture/quick_capture_launcher.dart';
 
-/// 3d — the notification-area icon and its menu.
+/// 3d, the notification-area icon and its menu.
 ///
 /// The point of a tray icon here is not decoration: it is what makes "fermer
 /// réduit dans la zone de notification" mean something, and it is the one

@@ -47,7 +47,7 @@ class TrashedNote {
 }
 
 /// Reads and writes the vault: one `.md` file per note, YAML frontmatter on
-/// top, raw content underneath. Files are the source of truth — the SQLite
+/// top, raw content underneath. Files are the source of truth, the SQLite
 /// index in [IndexRepository] is a derived cache that can be thrown away.
 class FileRepository {
   FileRepository(this.root);
@@ -141,7 +141,7 @@ class FileRepository {
     return folders.toList()..sort(_folderOrder);
   }
 
-  /// Inbox first, Archive last, everything else alphabetically — and every
+  /// Inbox first, Archive last, everything else alphabetically, and every
   /// sub-folder immediately under its parent, which is what lets the sidebar
   /// draw the tree by walking a flat list once.
   ///
@@ -241,7 +241,7 @@ class FileRepository {
       attachment: _string(map['attachment']),
       attachmentBytes: _int(map['attachment_size']) ?? 0,
       sourceName: _string(map['source']),
-      // The body's size, not the file's — the frontmatter is bookkeeping and
+      // The body's size, not the file's, the frontmatter is bookkeeping and
       // has no business showing up in the status bar.
       sizeBytes: utf8.encode(body).length,
       fileModified: stat.modified,
@@ -344,7 +344,7 @@ class FileRepository {
   /// it.
   ///
   /// Flat files become ordinary notes with their text as the body, which is
-  /// what makes them searchable — the whole value of importing a CSV or an
+  /// what makes them searchable, the whole value of importing a CSV or an
   /// XML into Jot is finding it again by its contents. Anything that is not
   /// text, or is too big to edit comfortably, is copied into the vault and
   /// referenced by the note instead.
@@ -408,7 +408,7 @@ class FileRepository {
   ///
   /// For an imported binary that is the copy in the vault, byte for byte. For
   /// everything else it is the body as UTF-8, which is exactly what was read
-  /// in at import — a note that came from a CSV gives back the same CSV,
+  /// in at import, a note that came from a CSV gives back the same CSV,
   /// including any edits made since.
   Future<List<int>> exportBytes(Note note) async {
     final file = attachmentFile(note);
@@ -433,7 +433,7 @@ class FileRepository {
     if (source != null && source.trim().isNotEmpty) return source;
 
     // An attachment carries its original name in the stored file, which is
-    // authoritative even when `source:` is missing — as it is for anything
+    // authoritative even when `source:` is missing, as it is for anything
     // imported before that key existed. Without this the app offers `.bin`
     // for a file it can plainly see is a PDF.
     final attachment = note.attachmentName;
@@ -511,7 +511,7 @@ class FileRepository {
   }
 
   /// Where deleted notes go. Dot-prefixed so [noteFiles] and [listFolders]
-  /// skip it — the trash is not a folder you can browse into by accident.
+  /// skip it, the trash is not a folder you can browse into by accident.
   static const trashDirName = '.trash';
 
   Directory get trashDir => Directory(p.join(root.path, trashDirName));
@@ -519,7 +519,7 @@ class FileRepository {
   /// Moves a note to the trash instead of unlinking it.
   ///
   /// Deletion in this app is a single click with no confirmation, which is
-  /// what makes it fast — the trash is what makes that safe. Files are kept
+  /// what makes it fast, the trash is what makes that safe. Files are kept
   /// under their original relative path so [restore] can put them back
   /// exactly where they were.
   Future<void> delete(Note note) async {
@@ -578,7 +578,7 @@ class FileRepository {
     final target = File(p.joinAll([root.path, ...p.split(trashed.originalPath)]));
     await target.parent.create(recursive: true);
     if (await target.exists()) {
-      // Something already occupies the old path — keep both.
+      // Something already occupies the old path, keep both.
       final base = p.basenameWithoutExtension(trashed.originalPath);
       final dir = p.dirname(trashed.originalPath);
       final free = await _freePath(dir == '.' ? '' : dir, '$base-restaure');
@@ -704,7 +704,7 @@ class FileRepository {
     return s == null ? null : DateTime.tryParse(s);
   }
 
-  /// "Première ligne, clé racine du JSON, ou domaine de l'URL" — the design's
+  /// "Première ligne, clé racine du JSON, ou domaine de l'URL", the design's
   /// own description of automatic titling.
   ///
   /// The first line of a JSON blob is `{`, and the first line of a URL is the
@@ -758,7 +758,7 @@ class FileRepository {
     return path.isEmpty || path == '/' ? host : '$host$path';
   }
 
-  /// Stable fallback id for files that have no `id:` — derived from the path
+  /// Stable fallback id for files that have no `id:`, derived from the path
   /// so re-scanning the same file twice does not produce two index entries.
   static String _deterministicId(String relativePath) =>
       _uuid.v5(Namespace.url.value, 'jot://$relativePath');

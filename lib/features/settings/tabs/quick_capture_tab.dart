@@ -9,7 +9,7 @@ import '../settings_window.dart';
 import '../widgets/settings_controls.dart';
 import 'general_tab.dart' show pickFolder;
 
-/// 3a — Capture rapide : ouverture, enregistrement, et l'aperçu de la
+/// 3a, Capture rapide : ouverture, enregistrement, et l'aperçu de la
 /// mini-fenêtre.
 class QuickCaptureTab extends ConsumerWidget {
   const QuickCaptureTab({super.key, required this.onDone});

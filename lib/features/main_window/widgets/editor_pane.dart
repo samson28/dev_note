@@ -67,7 +67,7 @@ class _EditorState extends ConsumerState<_Editor> {
               showLineNumbers: ref.watch(
                 settingsProvider.select((s) => s.showLineNumbers),
               ),
-              // Retyping the body can change what the note *is* — a pasted
+              // Retyping the body can change what the note *is*, a pasted
               // JSON blob should pick up its badge without being asked.
               onChanged: (content) => vault.edit(
                 note.copyWith(
@@ -146,7 +146,7 @@ class _Header extends ConsumerWidget {
             onTap: () => copyToClipboard(note.content),
             child: JotIcon(JotIcons.copy, size: 13, color: JotColors.textMuted),
           ),
-          // Anything the app can hold, it can hand back — including a note
+          // Anything the app can hold, it can hand back, including a note
           // that was typed here rather than imported.
           _IconButton(
             onTap: () => pickAndExportNote(ref, note),

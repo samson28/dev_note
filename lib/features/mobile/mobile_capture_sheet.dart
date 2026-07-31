@@ -13,7 +13,7 @@ import '../../widgets/jot_primitives.dart';
 import '../../widgets/type_badge.dart';
 import '../import/file_import.dart';
 
-/// 4d — quick capture on the phone.
+/// 4d, quick capture on the phone.
 ///
 /// The desktop opens a window on a global hotkey; a phone has no hotkey, so
 /// the "+" in the bottom bar raises this sheet instead. It exists rather than

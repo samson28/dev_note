@@ -10,7 +10,7 @@ import '../../widgets/jot_primitives.dart';
 import 'mobile_settings.dart';
 import 'mobile_trash.dart';
 
-/// 5a — the navigation drawer.
+/// 5a, the navigation drawer.
 ///
 /// The design moved folders, tags and Réglages out of the bottom bar and into
 /// a drawer opened from the header: "la barre du bas reste dédiée au contexte
@@ -20,7 +20,7 @@ class MobileDrawer extends ConsumerWidget {
   const MobileDrawer({super.key, required this.open, required this.onClose});
 
   /// Kept mounted while closed so it can animate out as well as in. Off-screen
-  /// and inert in that state — a drawer that pops into place has no business
+  /// and inert in that state, a drawer that pops into place has no business
   /// carrying a shadow that promises depth.
   final bool open;
   final VoidCallback onClose;

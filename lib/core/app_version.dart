@@ -3,7 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// The version the running binary actually carries.
 ///
 /// It used to be a constant repeated in five files, which drifted from
-/// `pubspec.yaml` the moment either changed — the app claimed 1.4.0 while the
+/// `pubspec.yaml` the moment either changed, the app claimed 1.4.0 while the
 /// executable Windows would install said 1.0.0. That mismatch is invisible in
 /// development and permanent in a release, so the number now comes from the
 /// same place the installer reads it.

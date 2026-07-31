@@ -15,7 +15,7 @@ import '../main_window/widgets/note_context_menu.dart';
 import '../settings/widgets/settings_controls.dart';
 import '../main_window/widgets/prompt_dialog.dart';
 
-/// 4e — the note action sheet.
+/// 4e, the note action sheet.
 ///
 /// The desktop reaches these actions through a right-click menu. A phone has
 /// no right click, so the same set rises from the bottom of the screen where a

@@ -172,7 +172,7 @@ class SearchNotifier extends Notifier<SearchState> {
     final watch = Stopwatch()..start();
 
     // Run once without the type filter to get honest chip counts, then apply
-    // it locally — one query instead of five.
+    // it locally, one query instead of five.
     final unfiltered = await _services.index.search(
       state.query,
       filters: state.filters.copyWith(types: const {}),

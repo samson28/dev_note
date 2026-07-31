@@ -43,7 +43,7 @@ extension QuickCaptureWindowControl on WindowController {
 /// Opens the capture window and owns the global hotkey.
 ///
 /// The window is a real OS window rather than an in-app overlay, because the
-/// whole point is capturing *without* leaving the task at hand — the main
+/// whole point is capturing *without* leaving the task at hand, the main
 /// window may well be minimised. If the platform refuses to give us one,
 /// [open] reports failure and the main window falls back to an in-app panel;
 /// capture is the one thing that must never be unavailable.
@@ -126,7 +126,7 @@ abstract final class QuickCaptureLauncher {
       await controller.show();
       return true;
     } on Object catch (e) {
-      debugPrint('Dev Note: capture en fenêtre séparée indisponible ($e) — repli en overlay');
+      debugPrint('Dev Note: capture en fenêtre séparée indisponible ($e), repli en overlay');
       onFallback?.call();
       return false;
     }

@@ -37,7 +37,7 @@ class MobileShell extends StatelessWidget {
   Widget build(BuildContext context) => const MobileListScreen();
 }
 
-/// List screen — the large scope title, an inline search field, the type
+/// List screen, the large scope title, an inline search field, the type
 /// filter row, then grouped cards with the "+" FAB anchored bottom-right.
 class MobileListScreen extends ConsumerStatefulWidget {
   const MobileListScreen({super.key});
@@ -415,7 +415,7 @@ class _BottomBar extends StatelessWidget {
       );
 }
 
-/// Detail screen — back affordance, metadata, tags, the body, and the four
+/// Detail screen, back affordance, metadata, tags, the body, and the four
 /// bottom actions from the design.
 class MobileDetailScreen extends ConsumerWidget {
   const MobileDetailScreen({super.key, required this.noteId});

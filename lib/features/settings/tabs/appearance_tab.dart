@@ -8,7 +8,7 @@ import '../../../widgets/jot_primitives.dart';
 import '../settings_window.dart';
 import '../widgets/settings_controls.dart';
 
-/// 2c — Apparence, avec aperçu live.
+/// 2c, Apparence, avec aperçu live.
 class AppearanceTab extends ConsumerWidget {
   const AppearanceTab({super.key, required this.onDone});
 
@@ -400,7 +400,7 @@ class _Swatch extends StatelessWidget {
           decoration: BoxDecoration(
             color: accent.color,
             borderRadius: BorderRadius.circular(6),
-            // `box-shadow: 0 0 0 1.5px <bg>, 0 0 0 3px <accent>` — a ring
+            // `box-shadow: 0 0 0 1.5px <bg>, 0 0 0 3px <accent>`, a ring
             // separated from the swatch by a gap of window background.
             boxShadow: selected
                 ? [

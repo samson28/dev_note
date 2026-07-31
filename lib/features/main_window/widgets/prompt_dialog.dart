@@ -7,7 +7,7 @@ import '../../../widgets/jot_primitives.dart';
 /// Centres a floating panel and gives it the `Material` ancestor that
 /// `TextField` (and the text-selection toolbar) require.
 ///
-/// `showDialog` only provides a `Navigator`, not a `Material` — without this a
+/// `showDialog` only provides a `Navigator`, not a `Material`, without this a
 /// bare `TextField` inside a hand-built panel throws "No Material widget
 /// found". Transparency keeps the panel's own surface and shadow intact.
 class _DialogSurface extends StatelessWidget {
@@ -133,7 +133,7 @@ class _PromptDialogState extends State<PromptDialog> {
       );
 }
 
-/// The "Déplacer vers..." picker — a list of folders on the same raised surface.
+/// The "Déplacer vers..." picker, a list of folders on the same raised surface.
 class FolderPickerDialog extends StatelessWidget {
   const FolderPickerDialog({super.key, required this.folders, this.current});
 

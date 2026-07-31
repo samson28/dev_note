@@ -1,4 +1,4 @@
-// Material is imported for TextField/InputDecoration/SelectableText only —
+// Material is imported for TextField/InputDecoration/SelectableText only -
 // the visual language comes entirely from JotTheme, not from Material.
 import 'dart:io';
 
@@ -49,7 +49,7 @@ class _NoteBodyState extends State<NoteBody> {
   late TextEditingController _controller;
   late FocusNode _focus;
 
-  /// Prose is edited directly — there is nothing to render differently, and
+  /// Prose is edited directly, there is nothing to render differently, and
   /// making the user click "brut" first would be pure friction.
   bool get _alwaysRaw => widget.note.type == NoteType.text;
 

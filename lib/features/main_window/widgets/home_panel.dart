@@ -18,7 +18,7 @@ import '../../import/file_import.dart';
 /// the app has already decided what you came for, and this one exists for
 /// capture and retrieval, not reading.
 ///
-/// It is deliberately not a screen in front of the app — nothing has to be
+/// It is deliberately not a screen in front of the app, nothing has to be
 /// dismissed to start typing. It is the resting state of a column that was
 /// empty anyway.
 class HomePanel extends ConsumerWidget {
@@ -107,7 +107,7 @@ class HomePanel extends ConsumerWidget {
 
 /// One note on the home panel: badge, title, folder and when it was touched.
 ///
-/// Flatter than the list column's row on purpose — this is a way back into
+/// Flatter than the list column's row on purpose, this is a way back into
 /// work, not a place to select and act on things.
 class _HomeRow extends ConsumerWidget {
   const _HomeRow({required this.note});

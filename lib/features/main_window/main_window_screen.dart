@@ -113,8 +113,8 @@ class _MainWindowScreenState extends ConsumerState<MainWindowScreen> {
 
 /// Wraps the window so files dragged from the file manager land in the vault.
 ///
-/// This is the fastest import path there is — no dialog, no folder to
-/// navigate — so it covers the whole window rather than a designated strip.
+/// This is the fastest import path there is, no dialog, no folder to
+/// navigate, so it covers the whole window rather than a designated strip.
 class _DropZone extends StatefulWidget {
   const _DropZone({required this.child, required this.onDropped});
 
@@ -158,7 +158,7 @@ class _DropZoneState extends State<_DropZone> {
   }
 }
 
-/// A thin strip for non-blocking problems — unreadable files, a rebuilt index.
+/// A thin strip for non-blocking problems, unreadable files, a rebuilt index.
 ///
 /// Deliberately not a dialog: nothing here is worth interrupting a capture for.
 class _NoticeBar extends ConsumerWidget {

@@ -35,8 +35,8 @@ Future<int> pickAndImportFiles(WidgetRef ref, {String? folder}) async {
 /// under the name it arrived with. Returns the path written, or null when the
 /// user cancelled.
 ///
-/// On mobile there is no "save as" dialog in the desktop sense — `saveFile`
-/// writes the bytes itself and reports where — so the same call covers both.
+/// On mobile there is no "save as" dialog in the desktop sense, `saveFile`
+/// writes the bytes itself and reports where, so the same call covers both.
 Future<String?> pickAndExportNote(WidgetRef ref, Note note) async {
   final files = ref.read(servicesProvider).files;
 
@@ -69,7 +69,7 @@ bool get supportsFileDrop =>
 
 /// The overlay shown while files hover over the window.
 ///
-/// Drag-and-drop is the fastest way in — no dialog, no folder navigation —
+/// Drag-and-drop is the fastest way in, no dialog, no folder navigation -
 /// so it needs an unmistakable target, not a subtle highlight.
 class DropTargetOverlay extends StatelessWidget {
   const DropTargetOverlay({super.key});

@@ -175,7 +175,7 @@ Future<NoteAction?> showNoteMenu(
   );
 }
 
-/// 3d — "Supprimer « ... » ?"
+/// 3d, "Supprimer « ... » ?"
 ///
 /// Deletion is a single click everywhere else in the app, which is what keeps
 /// it fast; this dialog is what makes that safe. It states plainly where the

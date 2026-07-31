@@ -8,7 +8,7 @@ import 'file_repository.dart';
 import 'index_repository.dart';
 
 /// Watches the vault and keeps the index in step with whatever happens on
-/// disk — edits from another editor, a Dropbox sync, a `git checkout`.
+/// disk, edits from another editor, a Dropbox sync, a `git checkout`.
 ///
 /// Events are coalesced over a short window: a save from an external editor
 /// often lands as remove+add, and re-indexing twice for one logical change

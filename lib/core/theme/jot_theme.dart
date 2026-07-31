@@ -7,7 +7,7 @@ export 'jot_colors.dart';
 export 'jot_metrics.dart';
 export 'jot_typography.dart';
 
-/// Jot only ever renders in its own dark palette — there is no light variant
+/// Jot only ever renders in its own dark palette, there is no light variant
 /// in the design, so the theme is a thin shell that stops Material defaults
 /// (ripples, blue selection, Roboto) from leaking into the UI.
 abstract final class JotTheme {

@@ -9,7 +9,7 @@ import '../../widgets/jot_primitives.dart';
 import '../settings/widgets/settings_controls.dart';
 import 'mobile_settings.dart';
 
-/// 4b — Réglages, Apparence.
+/// 4b, Réglages, Apparence.
 ///
 /// The three theme cards are stacked previews rather than the desktop's
 /// three-column miniatures: a phone only ever shows one column, so the mock
