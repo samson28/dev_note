@@ -9,18 +9,18 @@ import 'package:flutter/material.dart'
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../widgets/jot_icons.dart';
 import '../../core/models/note.dart';
+import '../../widgets/jot_icons.dart';
 import '../../core/models/note_type.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../core/utils/jot_format.dart';
-import '../../state/search_notifier.dart';
 import '../../state/vault_notifier.dart';
 import '../../widgets/jot_primitives.dart';
 import '../../widgets/json_viewer.dart' show copyToClipboard;
 import '../../widgets/note_body.dart';
 import '../../widgets/note_card.dart';
 import '../../widgets/type_badge.dart';
+import 'mobile_drawer.dart';
 import '../main_window/widgets/note_context_menu.dart';
 import '../main_window/widgets/prompt_dialog.dart';
 
@@ -44,6 +44,7 @@ class MobileListScreen extends ConsumerStatefulWidget {
 class _MobileListScreenState extends ConsumerState<MobileListScreen> {
   final _query = TextEditingController();
   NoteType? _typeFilter;
+  bool _drawerOpen = false;
 
   @override
   void dispose() {
@@ -71,7 +72,9 @@ class _MobileListScreenState extends ConsumerState<MobileListScreen> {
 
     return Scaffold(
       backgroundColor: JotColors.window,
-      body: SafeArea(
+      body: Stack(
+        children: [
+          SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -83,6 +86,7 @@ class _MobileListScreenState extends ConsumerState<MobileListScreen> {
               onQueryChanged: (_) => setState(() {}),
               typeFilter: _typeFilter,
               onTypeChanged: (type) => setState(() => _typeFilter = type),
+              onMenu: () => setState(() => _drawerOpen = true),
             ),
             Expanded(
               child: notes.isEmpty
@@ -105,6 +109,10 @@ class _MobileListScreenState extends ConsumerState<MobileListScreen> {
             ),
           ],
         ),
+          ),
+          if (_drawerOpen)
+            MobileDrawer(onClose: () => setState(() => _drawerOpen = false)),
+        ],
       ),
     );
   }
@@ -126,7 +134,10 @@ class _Header extends ConsumerWidget {
     required this.onQueryChanged,
     required this.typeFilter,
     required this.onTypeChanged,
+    required this.onMenu,
   });
+
+  final VoidCallback onMenu;
 
   final Scope scope;
   final int total;
@@ -160,10 +171,10 @@ class _Header extends ConsumerWidget {
                 Text('$total', style: JotText.mono(size: 12, color: JotColors.textSubtle)),
                 const SizedBox(width: 10),
                 Hoverable(
-                  onTap: () => ref.read(searchProvider.notifier).openPalette(),
+                  onTap: onMenu,
                   builder: (context, _) => Container(
-                    width: 30,
-                    height: 30,
+                    width: 34,
+                    height: 34,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: JotColors.neutralWashSoft,
