@@ -43,3 +43,30 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# --- Ajouté pour la publication open source ---
+
+# Secrets de signature. Rien de tout ceci n'existe encore dans le dépôt :
+# c'est justement pour que ça n'y entre jamais par accident.
+android/key.properties
+**/*.jks
+**/*.keystore
+*.p12
+*.pem
+.env
+.env.*
+
+# Chemins absolus de la machine de build, régénérés par `flutter pub get`.
+android/local.properties
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+macos/Flutter/Generated.xcconfig
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# Sorties d'outils locaux.
+graphify-out/
+*.apk
+*.aab
+*.msix

@@ -2,7 +2,11 @@
 
 Capture et retrouve tes notes de dev en quelques secondes. Fichiers Markdown en clair, recherche FTS5 instantanée, détection automatique du type. Desktop d'abord, 100 % hors ligne.
 
-<!-- Capture d'écran à placer ici : docs/capture.png -->
+![Dev Note sur Windows](docs/capture.png)
+
+<img src="docs/capture-mobile.png" alt="Dev Note sur téléphone" width="300">
+
+> Les captures utilisent un coffre de démonstration, pas de vraies notes.
 
 ## Pourquoi
 
@@ -173,4 +177,6 @@ Les tests portent volontairement sur la couche qui touche vos fichiers : import,
 
 ## Licence
 
-À définir.
+MIT — voir [LICENSE](LICENSE).
+
+JetBrains Mono est distribuée sous SIL Open Font License 1.1 (`assets/fonts/OFL.txt`), les icônes Lucide sous ISC, et `packages/desktop_drop/` reste sous la licence MIT de son auteur d'origine.
