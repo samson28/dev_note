@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../widgets/jot_icons.dart';
 import '../../core/models/note_type.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../core/utils/jot_format.dart';
@@ -215,7 +216,7 @@ class _QueryField extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text('⌕', style: JotText.ui(size: 16, color: JotColors.accent)),
+            JotIcon(JotIcons.search, size: 17, color: JotColors.accent),
             const SizedBox(width: 12),
             Expanded(
               child: TextField(
@@ -525,7 +526,7 @@ class _PaletteEmpty extends ConsumerWidget {
               border: Border.all(color: JotColors.borderRaised, width: 1.5),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text('⌕', style: JotText.ui(size: 18, color: JotColors.textDisabled)),
+            child: JotIcon(JotIcons.search, size: 20, color: JotColors.textDisabled),
           ),
           const SizedBox(height: 14),
           Text(

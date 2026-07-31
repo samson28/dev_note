@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' show Material, MaterialType, showDialog;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../widgets/jot_icons.dart';
 import '../../../core/models/note.dart';
 import '../../../core/models/note_type.dart';
 import '../../../core/theme/jot_theme.dart';
@@ -156,7 +157,7 @@ class _Header extends ConsumerWidget {
           ),
           _IconButton(
             onTap: () => copyToClipboard(note.content),
-            child: Text('⧉', style: JotText.mono(size: 12, color: JotColors.textMuted)),
+            child: JotIcon(JotIcons.copy, size: 13, color: JotColors.textMuted),
           ),
           Container(
             width: 1,
@@ -167,7 +168,7 @@ class _Header extends ConsumerWidget {
           _IconButton(
             danger: true,
             onTap: () => _confirmDelete(context, ref),
-            child: Text('✕', style: JotText.mono(size: 12, color: JotColors.textMuted)),
+            child: JotIcon(JotIcons.close, size: 13, color: JotColors.textMuted),
           ),
         ],
       ),

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart'
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../widgets/jot_icons.dart';
 import '../../core/models/note.dart';
 import '../../core/models/note_type.dart';
 import '../../core/theme/jot_theme.dart';
@@ -168,7 +169,7 @@ class _Header extends ConsumerWidget {
                       color: JotColors.neutralWashSoft,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text('☰', style: JotText.ui(size: 13, color: JotColors.textBody)),
+                    child: JotIcon(JotIcons.menu, size: 15, color: JotColors.textBody),
                   ),
                 ),
               ],
@@ -184,7 +185,7 @@ class _Header extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  Text('⌕', style: JotText.ui(size: 13, color: JotColors.textSubtle)),
+                  JotIcon(JotIcons.search, size: 14, color: JotColors.textSubtle),
                   const SizedBox(width: 9),
                   Expanded(
                     child: TextField(
@@ -432,7 +433,7 @@ class _DetailHeader extends ConsumerWidget {
               onTap: () => Navigator.of(context).maybePop(),
               builder: (context, _) => Row(
                 children: [
-                  Text('‹', style: JotText.ui(size: 17, color: JotColors.accent)),
+                  JotIcon(JotIcons.back, size: 18, color: JotColors.accent),
                   const SizedBox(width: 11),
                   Text(
                     note.folder,

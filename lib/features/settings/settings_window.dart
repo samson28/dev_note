@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' show Material, MaterialType, showDialog;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../widgets/jot_icons.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../widgets/jot_primitives.dart';
 import 'tabs/about_tab.dart';
@@ -129,7 +130,7 @@ class _TitleBar extends StatelessWidget {
                 height: JotMetrics.windowButtonHeight,
                 alignment: Alignment.center,
                 color: hovered ? JotColors.danger : const Color(0x00000000),
-                child: Text('✕', style: JotText.ui(size: 15, color: JotColors.textDim)),
+                child: JotIcon(JotIcons.close, size: 15, color: JotColors.textDim),
               ),
             ),
           ],

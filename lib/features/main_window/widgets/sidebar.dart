@@ -6,6 +6,7 @@ import '../../../core/models/note.dart';
 import '../../../core/theme/jot_theme.dart';
 import '../../../state/search_notifier.dart';
 import '../../../state/vault_notifier.dart';
+import '../../../widgets/jot_icons.dart';
 import '../../../widgets/jot_primitives.dart';
 import '../../settings/settings_window.dart';
 import 'prompt_dialog.dart';
@@ -114,6 +115,8 @@ class Sidebar extends ConsumerWidget {
               children: [
                 Row(
                   children: [
+                    JotIcon(JotIcons.plus, size: 13, color: JotColors.textSubtle),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Capture rapide',
@@ -126,20 +129,23 @@ class Sidebar extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Hoverable(
                   onTap: () => showSettings(context),
-                  builder: (context, hovered) => Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Réglages',
-                          style: JotText.ui(
-                            size: 11,
-                            color: hovered ? JotColors.textPrimary : JotColors.textSubtle,
+                  builder: (context, hovered) {
+                    final tint =
+                        hovered ? JotColors.textPrimary : JotColors.textSubtle;
+                    return Row(
+                      children: [
+                        JotIcon(JotIcons.settings, size: 13, color: tint),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Réglages',
+                            style: JotText.ui(size: 11, color: tint),
                           ),
                         ),
-                      ),
-                      const Keycap('Ctrl ,', outlined: true),
-                    ],
-                  ),
+                        const Keycap('Ctrl ,', outlined: true),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -185,7 +191,7 @@ class _SearchEntry extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Text('⌕', style: JotText.ui(size: 12, color: JotColors.textSubtle)),
+              JotIcon(JotIcons.search, size: 13, color: JotColors.textSubtle),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -325,7 +331,9 @@ class _TrashRow extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   children: [
-                    FolderGlyph(
+                    JotIcon(
+                      JotIcons.trash,
+                      size: 13,
                       color: active ? JotColors.accent : JotColors.textGhost,
                     ),
                     const SizedBox(width: 9),
