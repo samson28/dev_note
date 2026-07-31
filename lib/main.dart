@@ -55,7 +55,9 @@ Future<void> main(List<String> args) async {
   final services = await JotServices.boot();
 
   if (isDesktop) {
-    await QuickCaptureLauncher.registerHotKey();
+    await QuickCaptureLauncher.registerHotKey(
+      services.initialSettings.shortcutFor(ShortcutAction.quickCapture),
+    );
   }
 
   runApp(
@@ -98,6 +100,15 @@ class JotApp extends ConsumerWidget {
     final theme = ref.watch(settingsProvider.select((s) => s.theme));
     final follow = ref.watch(settingsProvider.select((s) => s.followSystemTheme));
     final accent = ref.watch(settingsProvider.select((s) => s.accent));
+
+    // Re-register the system-wide shortcut whenever the user rebinds it.
+    // `registerHotKey` is a no-op when the combination has not changed.
+    if (desktop) {
+      ref.listen(
+        settingsProvider.select((s) => s.shortcutFor(ShortcutAction.quickCapture)),
+        (_, combo) => QuickCaptureLauncher.registerHotKey(combo),
+      );
+    }
 
     // MediaQuery would need a context below MaterialApp; the platform
     // dispatcher gives the same value and updates through the same rebuild.

@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../core/models/app_settings.dart';
+import '../../core/models/key_binding.dart';
 import '../../core/theme/jot_theme.dart';
 
 /// Marker written into the sub-window's `arguments` so every engine can tell
@@ -46,13 +48,6 @@ extension QuickCaptureWindowControl on WindowController {
 /// [open] reports failure and the main window falls back to an in-app panel;
 /// capture is the one thing that must never be unavailable.
 abstract final class QuickCaptureLauncher {
-  /// `Ctrl + Alt + N`, written `Ctrl Alt N` in the design.
-  static final _hotKey = HotKey(
-    key: PhysicalKeyboardKey.keyN,
-    modifiers: [HotKeyModifier.control, HotKeyModifier.alt],
-    scope: HotKeyScope.system,
-  );
-
   static bool get supported =>
       !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 
@@ -60,15 +55,46 @@ abstract final class QuickCaptureLauncher {
   /// in-app panel instead.
   static VoidCallback? onFallback;
 
-  /// Registers the system-wide shortcut. Failure is non-fatal: another app may
-  /// already own the combination, and the in-app binding still works.
-  static Future<void> registerHotKey() async {
-    if (!supported) return;
+  /// The combination currently registered, so a settings change that does not
+  /// touch it costs nothing.
+  static KeyCombo? _registered;
+
+  /// Registers the system-wide shortcut for [combo].
+  ///
+  /// Failure is non-fatal and deliberately quiet: another application may
+  /// already own the combination, and the in-app binding still works. The
+  /// Raccourcis tab is where a conflict is surfaced, not a dialog.
+  static Future<bool> registerHotKey(KeyCombo combo) async {
+    if (!supported) return false;
+    if (_registered == combo) return true;
+
+    final physical = combo.physicalKey;
+    if (physical == null) {
+      debugPrint('Jot: combinaison non liable ($combo)');
+      return false;
+    }
+
     try {
       await hotKeyManager.unregisterAll();
-      await hotKeyManager.register(_hotKey, keyDownHandler: (_) => open());
+      await hotKeyManager.register(
+        HotKey(
+          key: physical,
+          modifiers: [
+            if (combo.ctrl) HotKeyModifier.control,
+            if (combo.alt) HotKeyModifier.alt,
+            if (combo.shift) HotKeyModifier.shift,
+            if (combo.meta) HotKeyModifier.meta,
+          ],
+          scope: HotKeyScope.system,
+        ),
+        keyDownHandler: (_) => open(),
+      );
+      _registered = combo;
+      return true;
     } on Object catch (e) {
       debugPrint('Jot: raccourci global indisponible ($e)');
+      _registered = null;
+      return false;
     }
   }
 

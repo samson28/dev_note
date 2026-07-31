@@ -3,7 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/models/app_settings.dart';
+import '../../core/models/key_binding.dart';
 import '../../core/theme/jot_theme.dart';
+import '../../state/settings_notifier.dart';
+import '../../widgets/json_viewer.dart' show copyToClipboard;
+import 'widgets/note_context_menu.dart';
 import '../../state/search_notifier.dart';
 import '../../state/vault_notifier.dart';
 import '../../widgets/jot_primitives.dart';
@@ -143,20 +148,34 @@ class _Shortcuts extends ConsumerWidget {
 
   final Widget child;
 
+  /// Built from the user's bindings rather than hardcoded, so rebinding in the
+  /// Raccourcis tab actually takes effect. Combinations whose label cannot be
+  /// resolved to a key are skipped instead of throwing.
+  Map<ShortcutActivator, Intent> _bindings(AppSettings settings) {
+    final map = <ShortcutActivator, Intent>{};
+
+    void bind(ShortcutAction action, Intent intent) {
+      final activator = settings.shortcutFor(action).activator;
+      if (activator != null) map[activator] = intent;
+    }
+
+    bind(ShortcutAction.searchPalette, const _OpenPaletteIntent());
+    bind(ShortcutAction.newNote, const _NewNoteIntent());
+    bind(ShortcutAction.quickCapture, const _QuickCaptureIntent());
+    bind(ShortcutAction.pinNote, const _TogglePinIntent());
+    bind(ShortcutAction.deleteNote, const _DeleteNoteIntent());
+    bind(ShortcutAction.copyNote, const _CopyNoteIntent());
+
+    // Ctrl+, is conventional for preferences and is not user-rebindable.
+    map[const SingleActivator(LogicalKeyboardKey.comma, control: true)] =
+        const _SettingsIntent();
+
+    return map;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) => Shortcuts(
-        shortcuts: const {
-          SingleActivator(LogicalKeyboardKey.keyK, control: true): _OpenPaletteIntent(),
-          SingleActivator(LogicalKeyboardKey.keyK, meta: true): _OpenPaletteIntent(),
-          SingleActivator(LogicalKeyboardKey.keyN, control: true): _NewNoteIntent(),
-          SingleActivator(LogicalKeyboardKey.keyN, meta: true): _NewNoteIntent(),
-          SingleActivator(LogicalKeyboardKey.keyN, control: true, alt: true):
-              _QuickCaptureIntent(),
-          SingleActivator(LogicalKeyboardKey.keyP, control: true): _TogglePinIntent(),
-          SingleActivator(LogicalKeyboardKey.keyP, meta: true): _TogglePinIntent(),
-          SingleActivator(LogicalKeyboardKey.comma, control: true): _SettingsIntent(),
-          SingleActivator(LogicalKeyboardKey.comma, meta: true): _SettingsIntent(),
-        },
+        shortcuts: _bindings(ref.watch(settingsProvider)),
         child: Actions(
           actions: {
             _OpenPaletteIntent: CallbackAction<_OpenPaletteIntent>(
@@ -190,6 +209,26 @@ class _Shortcuts extends ConsumerWidget {
                 return null;
               },
             ),
+            _DeleteNoteIntent: CallbackAction<_DeleteNoteIntent>(
+              onInvoke: (_) {
+                final note = ref.read(vaultProvider).openNote;
+                if (note != null) {
+                  confirmDeleteNote(context, note).then((confirmed) {
+                    if (confirmed == true) {
+                      ref.read(vaultProvider.notifier).delete(note);
+                    }
+                  });
+                }
+                return null;
+              },
+            ),
+            _CopyNoteIntent: CallbackAction<_CopyNoteIntent>(
+              onInvoke: (_) {
+                final note = ref.read(vaultProvider).openNote;
+                if (note != null) copyToClipboard(note.content);
+                return null;
+              },
+            ),
           },
           child: Focus(autofocus: true, child: child),
         ),
@@ -214,4 +253,12 @@ class _TogglePinIntent extends Intent {
 
 class _SettingsIntent extends Intent {
   const _SettingsIntent();
+}
+
+class _DeleteNoteIntent extends Intent {
+  const _DeleteNoteIntent();
+}
+
+class _CopyNoteIntent extends Intent {
+  const _CopyNoteIntent();
 }
