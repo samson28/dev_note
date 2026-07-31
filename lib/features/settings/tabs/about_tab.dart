@@ -25,7 +25,7 @@ class AboutTab extends ConsumerWidget {
   /// launching a browser on a screen whose whole point is that nothing here
   /// talks to the network.
   static const releasesUrl =
-      'https://github.com/sbadayodi/dev-note/releases';
+      'https://github.com/samson28/dev_note/releases';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
