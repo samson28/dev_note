@@ -384,8 +384,21 @@ class JotPalette {
       ? const Color(0x66FFFFFF).withValues(alpha: 0.55)
       : const Color(0xB308090B);
 
-  /// Shadows are suppressed entirely on OLED: "zéro ombre portée".
-  List<BoxShadow> shadow(List<BoxShadow> value) => elevated ? value : const [];
+  /// Shadows are suppressed entirely on OLED ("zéro ombre portée"), and the
+  /// light theme softens the window shadow from .5 to .45 alpha.
+  List<BoxShadow> shadow(List<BoxShadow> value) {
+    if (!elevated) return const [];
+    if (!_light) return value;
+    return [
+      for (final s in value)
+        BoxShadow(
+          color: s.color.withValues(alpha: s.color.a * 0.9),
+          offset: s.offset,
+          blurRadius: s.blurRadius,
+          spreadRadius: s.spreadRadius,
+        ),
+    ];
+  }
 }
 
 /// Foreground / background pair for a type badge, plus an optional outline —

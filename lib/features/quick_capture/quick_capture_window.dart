@@ -184,7 +184,7 @@ class _QuickCaptureWindowState extends State<QuickCaptureWindow> {
           color: JotColors.palette,
           border: Border.all(color: JotColors.borderCapture),
           borderRadius: BorderRadius.circular(JotMetrics.captureRadius),
-          boxShadow: JotMetrics.captureShadow,
+          boxShadow: JotColors.active.shadow(JotMetrics.captureShadow),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(

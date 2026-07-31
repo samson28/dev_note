@@ -63,7 +63,7 @@ class _SettingsWindowState extends ConsumerState<SettingsWindow> {
                   color: JotColors.window,
                   border: Border.all(color: JotColors.borderWindow),
                   borderRadius: BorderRadius.circular(JotMetrics.windowRadius),
-                  boxShadow: JotMetrics.windowShadow,
+                  boxShadow: JotColors.active.shadow(JotMetrics.windowShadow),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Column(

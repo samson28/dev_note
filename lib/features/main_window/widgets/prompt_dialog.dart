@@ -72,7 +72,7 @@ class _PromptDialogState extends State<PromptDialog> {
             color: JotColors.raised,
             border: Border.all(color: JotColors.borderRaised),
             borderRadius: BorderRadius.circular(10),
-            boxShadow: JotMetrics.menuShadow,
+            boxShadow: JotColors.active.shadow(JotMetrics.menuShadow),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -149,7 +149,7 @@ class FolderPickerDialog extends StatelessWidget {
             color: JotColors.raised,
             border: Border.all(color: JotColors.borderRaised),
             borderRadius: BorderRadius.circular(8),
-            boxShadow: JotMetrics.menuShadow,
+            boxShadow: JotColors.active.shadow(JotMetrics.menuShadow),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -157,7 +157,7 @@ class _SearchPaletteState extends ConsumerState<SearchPalette> {
                   color: JotColors.palette,
                   border: Border.all(color: JotColors.borderPaletteOuter),
                   borderRadius: BorderRadius.circular(JotMetrics.paletteRadius),
-                  boxShadow: JotMetrics.paletteShadow,
+                  boxShadow: JotColors.active.shadow(JotMetrics.paletteShadow),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Column(

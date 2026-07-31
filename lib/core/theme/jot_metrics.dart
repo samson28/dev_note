@@ -70,12 +70,41 @@ abstract final class JotMetrics {
     ),
   ];
 
-  /// `0 14px 34px rgba(0,0,0,.55)`
+  /// `0 16px 40px rgba(0,0,0,.55)`
   static const menuShadow = <BoxShadow>[
     BoxShadow(
       color: JotColors.shadowMenu,
-      offset: Offset(0, 14),
-      blurRadius: 34,
+      offset: Offset(0, 16),
+      blurRadius: 40,
+    ),
+  ];
+
+  /// `0 16px 40px rgba(0,0,0,.6)` — the notification-area menu.
+  static const trayShadow = <BoxShadow>[
+    BoxShadow(
+      color: JotColors.shadowCapture,
+      offset: Offset(0, 16),
+      blurRadius: 40,
+    ),
+  ];
+
+  /// `14px 0 40px rgba(0,0,0,.5)` — the mobile drawer, cast sideways rather
+  /// than down because the panel slides in from the left edge.
+  static const drawerShadow = <BoxShadow>[
+    BoxShadow(
+      color: JotColors.shadowWindow,
+      offset: Offset(14, 0),
+      blurRadius: 40,
+    ),
+  ];
+
+  /// `0 18px 50px rgba(0,0,0,.45)` — the light theme casts a softer window
+  /// shadow than the dark ones, since the surface beneath it is paper.
+  static const windowShadowLight = <BoxShadow>[
+    BoxShadow(
+      color: Color(0x73000000),
+      offset: Offset(0, 18),
+      blurRadius: 50,
     ),
   ];
 }
