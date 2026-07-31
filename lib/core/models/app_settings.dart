@@ -184,6 +184,7 @@ class AppSettings {
     this.launchAtStartup = true,
     this.closeToTray = true,
     this.defaultFolder = 'Inbox',
+    this.vaultPath,
     this.autoDetectType = true,
     this.reformatJsonOnSave = false,
     this.maskCredentialValues = true,
@@ -219,6 +220,13 @@ class AppSettings {
   final bool launchAtStartup;
   final bool closeToTray;
   final String defaultFolder;
+
+  /// Where the notes live, when the user has moved them off the default.
+  ///
+  /// Null means `~/JotVault`. Made configurable so the vault can sit inside a
+  /// folder that Google Drive, OneDrive or Dropbox already synchronises —
+  /// which is continuous, versioned backup for no code and no account.
+  final String? vaultPath;
   final bool autoDetectType;
   final bool reformatJsonOnSave;
   final bool maskCredentialValues;
@@ -289,6 +297,8 @@ class AppSettings {
     bool? launchAtStartup,
     bool? closeToTray,
     String? defaultFolder,
+    String? vaultPath,
+    bool clearVaultPath = false,
     bool? autoDetectType,
     bool? reformatJsonOnSave,
     bool? maskCredentialValues,
@@ -318,6 +328,7 @@ class AppSettings {
         launchAtStartup: launchAtStartup ?? this.launchAtStartup,
         closeToTray: closeToTray ?? this.closeToTray,
         defaultFolder: defaultFolder ?? this.defaultFolder,
+        vaultPath: clearVaultPath ? null : (vaultPath ?? this.vaultPath),
         autoDetectType: autoDetectType ?? this.autoDetectType,
         reformatJsonOnSave: reformatJsonOnSave ?? this.reformatJsonOnSave,
         maskCredentialValues: maskCredentialValues ?? this.maskCredentialValues,
@@ -348,6 +359,7 @@ class AppSettings {
         'launchAtStartup': launchAtStartup,
         'closeToTray': closeToTray,
         'defaultFolder': defaultFolder,
+        'vaultPath': vaultPath,
         'autoDetectType': autoDetectType,
         'reformatJsonOnSave': reformatJsonOnSave,
         'maskCredentialValues': maskCredentialValues,
@@ -382,6 +394,13 @@ class AppSettings {
     bool flag(String key, bool fallback) =>
         json[key] is bool ? json[key] as bool : fallback;
 
+    String? optional(String key) {
+      final raw = json[key];
+      if (raw is! String) return null;
+      final trimmed = raw.trim();
+      return trimmed.isEmpty ? null : trimmed;
+    }
+
     final rawShortcuts = json['shortcuts'];
     final shortcuts = <ShortcutAction, KeyCombo>{...defaultShortcuts};
     if (rawShortcuts is Map) {
@@ -397,6 +416,7 @@ class AppSettings {
       launchAtStartup: flag('launchAtStartup', true),
       closeToTray: flag('closeToTray', true),
       defaultFolder: '${json['defaultFolder'] ?? 'Inbox'}',
+      vaultPath: optional('vaultPath'),
       autoDetectType: flag('autoDetectType', true),
       reformatJsonOnSave: flag('reformatJsonOnSave', false),
       maskCredentialValues: flag('maskCredentialValues', true),

@@ -25,7 +25,22 @@ abstract final class VaultPaths {
   static bool createdThisLaunch = false;
 
   /// The vault root, created on first access.
-  static Future<Directory> vault() async {
+  ///
+  /// [override] is the user's chosen location, when they have moved the vault
+  /// off the default — typically into a folder their cloud client already
+  /// synchronises. It is used as given: the folder they picked *is* the vault,
+  /// not its parent, so nothing appears nested a level deeper than expected.
+  static Future<Directory> vault({String? override}) async {
+    final chosen = override?.trim();
+    if (chosen != null && chosen.isNotEmpty) {
+      final dir = Directory(chosen);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+        createdThisLaunch = true;
+      }
+      return _cachedVault = dir;
+    }
+
     final cached = _cachedVault;
     if (cached != null) return cached;
 
@@ -51,6 +66,15 @@ abstract final class VaultPaths {
     if (!await support.exists()) await support.create(recursive: true);
     return File(p.join(support.path, indexFileName));
   }
+
+  /// The default location, for showing the user what "par défaut" means.
+  static String? get defaultVaultPath {
+    final home = _homeDirectory();
+    return home == null ? null : p.join(home, vaultFolderName);
+  }
+
+  /// Forgets the resolved vault, so the next [vault] call re-reads it.
+  static void invalidate() => _cachedVault = null;
 
   /// Carries settings over from the support directory the app used when it
   /// was called Jot.

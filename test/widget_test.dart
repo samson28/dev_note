@@ -178,6 +178,78 @@ void main() {
     });
   });
 
+  group('FileRepository vault move', () {
+    late Directory root;
+    late Directory target;
+    late FileRepository files;
+
+    setUp(() async {
+      root = await Directory.systemTemp.createTemp('jot_from_');
+      target = await Directory.systemTemp.createTemp('jot_to_');
+      files = FileRepository(root);
+      await files.ensureScaffold();
+    });
+
+    tearDown(() async {
+      for (final d in [root, target]) {
+        if (await d.exists()) await d.delete(recursive: true);
+      }
+    });
+
+    test('carries every note across, then empties the old folder', () async {
+      await files.create(content: 'un', title: 'a', folder: Folder.inbox);
+      await files.create(content: 'deux', title: 'b', folder: 'Enko');
+
+      final copied = await files.moveVaultTo(target);
+
+      expect(copied, greaterThanOrEqualTo(2));
+      expect(await root.exists(), isFalse);
+
+      final moved = FileRepository(target);
+      final notes = await moved.readAll();
+      expect(notes.map((n) => n.title).toSet(), {'a', 'b'});
+      // The folder structure has to survive, not just the files.
+      expect(notes.firstWhere((n) => n.title == 'b').folder, 'Enko');
+    });
+
+    test('a move onto the same folder is a no-op, not a wipe', () async {
+      await files.create(content: 'x', title: 'garde');
+
+      expect(await files.moveVaultTo(root), 0);
+      expect(await root.exists(), isTrue);
+      expect((await files.readAll()).length, 1);
+    });
+
+    test('attachments travel with their notes', () async {
+      final source = await Directory.systemTemp.createTemp('jot_src_');
+      final pdf = File('${source.path}/doc.pdf')
+        ..writeAsBytesSync([0x00, 0x11, 0x22]);
+      final note = await files.importFile(pdf);
+
+      await files.moveVaultTo(target);
+
+      final moved = FileRepository(target);
+      final read = await moved.read(
+        File('${target.path}/${note.relativePath}'),
+      );
+      expect(await moved.attachmentFile(read)!.exists(), isTrue);
+      expect(await moved.exportBytes(read), [0x00, 0x11, 0x22]);
+
+      await source.delete(recursive: true);
+    });
+
+    test('the trash travels too, so nothing restorable is silently lost',
+        () async {
+      final note = await files.create(content: 'y', title: 'jetee');
+      await files.delete(note);
+      expect((await files.listTrash()).length, 1);
+
+      await files.moveVaultTo(target);
+
+      expect((await FileRepository(target).listTrash()).length, 1);
+    });
+  });
+
   group('FileRepository import', () {
     late Directory root;
     late Directory source;

@@ -355,6 +355,30 @@ class VaultNotifier extends Notifier<VaultState> {
     );
   }
 
+  /// Moves the vault, or adopts an existing one, and reloads everything.
+  ///
+  /// Returns null on success, or the reason it did not happen — which the
+  /// caller shows verbatim. A failure here means the notes are still where
+  /// they were, which is the only outcome worth guaranteeing.
+  Future<String?> changeVault(String? path, {bool move = false}) async {
+    state = state.copyWith(loading: true);
+    try {
+      await _services.switchVault(path, move: move);
+    } on FileSystemException catch (e) {
+      state = state.copyWith(loading: false, notice: e.message);
+      return e.message;
+    } on Object catch (e) {
+      state = state.copyWith(loading: false, notice: 'Coffre inchangé: $e');
+      return '$e';
+    }
+
+    await refresh();
+    state = state.copyWith(
+      notice: move ? 'Coffre déplacé' : 'Coffre chargé depuis ce dossier',
+    );
+    return null;
+  }
+
   void notify(String message) => state = state.copyWith(notice: message);
 
   void dismissNotice() => state = state.copyWith(clearNotice: true);

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart' show showDialog;
 import 'package:flutter/widgets.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -17,6 +18,7 @@ import '../../../widgets/jot_primitives.dart';
 import '../../main_window/widgets/prompt_dialog.dart';
 import '../settings_window.dart';
 import '../widgets/settings_controls.dart';
+import '../widgets/vault_change_dialog.dart';
 
 /// 3b — Stockage & sauvegarde.
 class StorageTab extends ConsumerStatefulWidget {
@@ -120,7 +122,20 @@ class _StorageTabState extends ConsumerState<StorageTab> {
                     label: 'Ouvrir',
                     onTap: () => _openInExplorer(services.files.root.path),
                   ),
+                  const SizedBox(width: 6),
+                  JotRowButton(
+                    label: _busy == 'vault' ? 'En cours...' : 'Changer...',
+                    onTap: () => _changeVault(context, ref),
+                  ),
                 ],
+              ),
+              SettingRow(
+                label: 'Sauvegarde par le cloud',
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                help: 'Placez le coffre dans un dossier synchronisé par Google '
+                    'Drive, OneDrive ou Dropbox : la sauvegarde devient continue '
+                    'et versionnée, sans compte à connecter ici.',
+                trailing: const [],
               ),
               SettingRow(
                 label: "Reconstruire l'index de recherche",
@@ -306,6 +321,51 @@ class _StorageTabState extends ConsumerState<StorageTab> {
 
     await _refreshStats();
     _openInExplorer(services.files.root.path);
+  }
+
+  /// Picks a folder, asks what to do with it, and switches.
+  ///
+  /// The two answers are genuinely different operations, so the dialog states
+  /// both rather than picking one: "déplacer" carries the notes across,
+  /// "utiliser" adopts what is already there — which is the case when a cloud
+  /// client has restored the vault on a second machine.
+  Future<void> _changeVault(BuildContext context, WidgetRef ref) async {
+    if (_busy != null) return;
+
+    final picked = await FilePicker.getDirectoryPath(
+      dialogTitle: 'Choisir le dossier du coffre',
+      initialDirectory: ref.read(servicesProvider).files.root.path,
+    );
+    if (picked == null || !context.mounted) return;
+
+    final existing = await _countNotesIn(picked);
+    if (!context.mounted) return;
+
+    final move = await showDialog<bool>(
+      context: context,
+      barrierColor: JotColors.scrim,
+      builder: (_) => VaultChangeDialog(target: picked, notesAlreadyThere: existing),
+    );
+    if (move == null || !context.mounted) return;
+
+    setState(() => _busy = 'vault');
+    final failure =
+        await ref.read(vaultProvider.notifier).changeVault(picked, move: move);
+    if (failure == null) {
+      ref.read(settingsProvider.notifier).update((s) => s.copyWith(vaultPath: picked));
+    }
+    await _refreshStats();
+    if (mounted) setState(() => _busy = null);
+  }
+
+  static Future<int> _countNotesIn(String path) async {
+    final dir = Directory(path);
+    if (!await dir.exists()) return 0;
+    var count = 0;
+    await for (final e in dir.list(recursive: true, followLinks: false)) {
+      if (e is File && e.path.toLowerCase().endsWith('.md')) count++;
+    }
+    return count;
   }
 
   void _openInExplorer(String path) {

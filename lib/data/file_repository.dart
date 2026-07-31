@@ -56,8 +56,52 @@ class FileRepository {
   static const _uuid = Uuid();
   static const _fence = '---';
 
-  static Future<FileRepository> open() async =>
-      FileRepository(await VaultPaths.vault());
+  static Future<FileRepository> open({String? vaultPath}) async =>
+      FileRepository(await VaultPaths.vault(override: vaultPath));
+
+  /// Copies the vault to [target], then removes the source.
+  ///
+  /// Deliberately copy-then-delete rather than a rename: the whole point of
+  /// moving the vault is usually to land inside a cloud-synced folder, which
+  /// is often a different volume, where rename fails. The source is only
+  /// removed once every file has been written and counted, so an interrupted
+  /// move leaves the notes intact where they were.
+  ///
+  /// Returns how many files were copied.
+  Future<int> moveVaultTo(Directory target) async {
+    if (p.equals(target.path, root.path)) return 0;
+    if (!await target.exists()) await target.create(recursive: true);
+
+    var copied = 0;
+    await for (final entity in root.list(recursive: true, followLinks: false)) {
+      final relative = p.relative(entity.path, from: root.path);
+      final destination = p.join(target.path, relative);
+
+      if (entity is Directory) {
+        await Directory(destination).create(recursive: true);
+      } else if (entity is File) {
+        await Directory(p.dirname(destination)).create(recursive: true);
+        await entity.copy(destination);
+        copied++;
+      }
+    }
+
+    // Verified before anything is destroyed: the count has to match, or the
+    // source stays and the user has two copies rather than none.
+    var landed = 0;
+    await for (final entity in target.list(recursive: true, followLinks: false)) {
+      if (entity is File) landed++;
+    }
+    if (landed < copied) {
+      throw FileSystemException(
+        'copie incomplète, le coffre d\'origine est conservé',
+        target.path,
+      );
+    }
+
+    await root.delete(recursive: true);
+    return copied;
+  }
 
   /// Errors hit during the last scan, surfaced in the UI as a non-blocking
   /// notice rather than a dialog.
