@@ -12,6 +12,7 @@ import 'features/main_window/main_window_screen.dart';
 import 'features/mobile/mobile_shell.dart';
 import 'features/quick_capture/quick_capture_hosts.dart';
 import 'features/quick_capture/quick_capture_launcher.dart';
+import 'features/tray/jot_tray.dart';
 import 'state/jot_services.dart';
 
 /// Every window runs this `main` in its own Flutter engine;
@@ -58,6 +59,11 @@ Future<void> main(List<String> args) async {
     await QuickCaptureLauncher.registerHotKey(
       services.initialSettings.shortcutFor(ShortcutAction.quickCapture),
     );
+    JotTray.instance.closeToTray = services.initialSettings.closeToTray;
+    await JotTray.instance.setCaptureShortcut(
+      services.initialSettings.shortcutFor(ShortcutAction.quickCapture).parts.join(' '),
+    );
+    await JotTray.instance.install();
   }
 
   runApp(
@@ -106,7 +112,16 @@ class JotApp extends ConsumerWidget {
     if (desktop) {
       ref.listen(
         settingsProvider.select((s) => s.shortcutFor(ShortcutAction.quickCapture)),
-        (_, combo) => QuickCaptureLauncher.registerHotKey(combo),
+        (_, combo) {
+          QuickCaptureLauncher.registerHotKey(combo);
+          JotTray.instance.setCaptureShortcut(combo.parts.join(' '));
+        },
+      );
+      // The tray decides what closing the window does, so it has to hear
+      // about the setting the moment it changes, not at the next launch.
+      ref.listen(
+        settingsProvider.select((s) => s.closeToTray),
+        (_, value) => JotTray.instance.closeToTray = value,
       );
     }
 

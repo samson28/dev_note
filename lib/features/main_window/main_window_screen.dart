@@ -18,6 +18,7 @@ import '../quick_capture/quick_capture_hosts.dart';
 import '../quick_capture/quick_capture_launcher.dart';
 import '../search_palette/search_palette.dart';
 import '../settings/settings_window.dart';
+import '../tray/jot_tray.dart';
 import 'widgets/editor_pane.dart';
 import 'widgets/note_list_pane.dart';
 import 'widgets/sidebar.dart';
@@ -43,11 +44,15 @@ class _MainWindowScreenState extends ConsumerState<MainWindowScreen> {
     QuickCaptureLauncher.onFallback = () {
       if (mounted) setState(() => _captureOverlay = true);
     };
+    JotTray.instance.onOpenSettings = () {
+      if (mounted) showSettings(context);
+    };
   }
 
   @override
   void dispose() {
     QuickCaptureLauncher.onFallback = null;
+    JotTray.instance.onOpenSettings = null;
     super.dispose();
   }
 

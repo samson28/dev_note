@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_multi_window
   hotkey_manager_windows
   screen_retriever_windows
+  tray_manager
   url_launcher_windows
   window_manager
 )
