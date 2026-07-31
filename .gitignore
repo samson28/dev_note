@@ -65,7 +65,10 @@ macos/Flutter/ephemeral/
 linux/flutter/ephemeral/
 windows/flutter/ephemeral/
 
-# Sorties d'outils locaux.
+# Sorties d'outils locaux. Les redirections de `flutter run` finissent ici :
+# *.log était déjà couvert plus haut, mais pas .err ni .out.
+*.err
+*.out
 graphify-out/
 *.apk
 *.aab
