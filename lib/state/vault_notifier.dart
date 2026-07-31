@@ -52,6 +52,7 @@ class VaultState {
     this.openNote,
     this.loading = true,
     this.totalNotes = 0,
+    this.recent = const [],
     this.notice,
   });
 
@@ -69,6 +70,12 @@ class VaultState {
   final bool loading;
   final int totalNotes;
 
+  /// The most recently touched notes across the whole vault, pinned first.
+  ///
+  /// Scope-independent on purpose: this feeds the home panel, whose job is to
+  /// answer "what was I doing?" — a question the current folder cannot.
+  final List<Note> recent;
+
   /// Transient, non-blocking message (unreadable file, index rebuilt...).
   final String? notice;
 
@@ -81,6 +88,7 @@ class VaultState {
     bool clearOpenNote = false,
     bool? loading,
     int? totalNotes,
+    List<Note>? recent,
     String? notice,
     bool clearNotice = false,
   }) => VaultState(
@@ -91,6 +99,7 @@ class VaultState {
     openNote: clearOpenNote ? null : (openNote ?? this.openNote),
     loading: loading ?? this.loading,
     totalNotes: totalNotes ?? this.totalNotes,
+    recent: recent ?? this.recent,
     notice: clearNotice ? null : (notice ?? this.notice),
   );
 }
@@ -127,6 +136,7 @@ class VaultNotifier extends Notifier<VaultState> {
     final tags = await _services.index.listTags();
     final notes = await _notesForScope(state.scope);
     final total = await _services.index.count();
+    final recent = await _services.index.listNotes(limit: 24);
 
     final errors = _services.files.recoverableErrors;
     final notice = errors.isEmpty
@@ -138,6 +148,7 @@ class VaultNotifier extends Notifier<VaultState> {
       tags: tags,
       notes: notes,
       totalNotes: total,
+      recent: recent,
       loading: false,
       notice: notice,
       clearNotice: notice == null,
@@ -145,15 +156,13 @@ class VaultNotifier extends Notifier<VaultState> {
 
     // Keep a selection alive across refreshes so an external edit does not
     // yank the editor out from under the user.
+    //
+    // Nothing is opened on the user's behalf, though: landing straight inside
+    // a note means the app has already decided what you came for, and reading
+    // is not what this one is for. An empty selection shows the home panel.
     final open = state.openNote;
-    if (open == null) {
-      if (notes.isNotEmpty) await open_(notes.first);
-    } else if (!notes.any((n) => n.id == open.id)) {
-      if (notes.isNotEmpty) {
-        await open_(notes.first);
-      } else {
-        state = state.copyWith(clearOpenNote: true);
-      }
+    if (open != null && !notes.any((n) => n.id == open.id)) {
+      state = state.copyWith(clearOpenNote: true);
     }
   }
 
@@ -185,7 +194,6 @@ class VaultNotifier extends Notifier<VaultState> {
     state = state.copyWith(scope: scope, clearOpenNote: true);
     final notes = await _notesForScope(scope);
     state = state.copyWith(notes: notes);
-    if (notes.isNotEmpty) await open_(notes.first);
   }
 
   /// Loads the full body of [note] into the editor.
@@ -378,6 +386,12 @@ class VaultNotifier extends Notifier<VaultState> {
     );
     return null;
   }
+
+  /// Puts the editor column back to the home panel.
+  ///
+  /// Needed the moment the app stopped opening a note by itself: without it,
+  /// the first note you open is the last thing you can get out of.
+  void closeNote() => state = state.copyWith(clearOpenNote: true);
 
   void notify(String message) => state = state.copyWith(notice: message);
 

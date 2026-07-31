@@ -12,6 +12,7 @@ import '../../widgets/json_viewer.dart' show copyToClipboard;
 import 'widgets/note_context_menu.dart';
 import '../../state/search_notifier.dart';
 import '../../state/vault_notifier.dart';
+import '../../widgets/jot_icons.dart';
 import '../../widgets/jot_primitives.dart';
 import '../import/file_import.dart';
 import '../quick_capture/quick_capture_hosts.dart';
@@ -188,12 +189,10 @@ class _NoticeBar extends ConsumerWidget {
             const SizedBox(width: 12),
             Hoverable(
               onTap: () => ref.read(vaultProvider.notifier).dismissNotice(),
-              builder: (context, hovered) => Text(
-                '✕',
-                style: JotText.ui(
-                  size: 11,
-                  color: hovered ? JotColors.textPrimary : JotColors.textSubtle,
-                ),
+              builder: (context, hovered) => JotIcon(
+                JotIcons.close,
+                size: 12,
+                color: hovered ? JotColors.textPrimary : JotColors.textSubtle,
               ),
             ),
           ],
@@ -231,6 +230,9 @@ class _Shortcuts extends ConsumerWidget {
     // Ctrl+, is conventional for preferences and is not user-rebindable.
     map[const SingleActivator(LogicalKeyboardKey.comma, control: true)] =
         const _SettingsIntent();
+    // Escape closes the note and shows the home panel. The palette handles its
+    // own Escape on its focus node, so this never fires while it is open.
+    map[const SingleActivator(LogicalKeyboardKey.escape)] = const _HomeIntent();
 
     return map;
   }
@@ -240,6 +242,12 @@ class _Shortcuts extends ConsumerWidget {
         shortcuts: _bindings(ref.watch(settingsProvider)),
         child: Actions(
           actions: {
+            _HomeIntent: CallbackAction<_HomeIntent>(
+              onInvoke: (_) {
+                ref.read(vaultProvider.notifier).closeNote();
+                return null;
+              },
+            ),
             _OpenPaletteIntent: CallbackAction<_OpenPaletteIntent>(
               onInvoke: (_) {
                 ref.read(searchProvider.notifier).openPalette();
@@ -295,6 +303,10 @@ class _Shortcuts extends ConsumerWidget {
           child: Focus(autofocus: true, child: child),
         ),
       );
+}
+
+class _HomeIntent extends Intent {
+  const _HomeIntent();
 }
 
 class _OpenPaletteIntent extends Intent {

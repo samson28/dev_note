@@ -14,8 +14,8 @@ import '../../../state/vault_notifier.dart';
 import '../../../widgets/jot_primitives.dart';
 import '../../../widgets/json_viewer.dart' show JsonViewer, copyToClipboard;
 import '../../../widgets/note_body.dart';
-import '../../../widgets/note_card.dart';
 import '../../../widgets/type_badge.dart';
+import 'home_panel.dart';
 import 'note_context_menu.dart';
 import 'prompt_dialog.dart';
 
@@ -31,20 +31,10 @@ class EditorPane extends ConsumerWidget {
     return Expanded(
       child: ColoredBox(
         color: JotColors.editorSurface,
-        child: note == null ? const _NoSelection() : _Editor(note: note),
+        child: note == null ? const HomePanel() : _Editor(note: note),
       ),
     );
   }
-}
-
-class _NoSelection extends StatelessWidget {
-  const _NoSelection();
-
-  @override
-  Widget build(BuildContext context) => const EmptyState(
-        title: 'Aucune note sélectionnée',
-        message: 'Choisis une note à gauche, ou appuie sur Ctrl K pour la retrouver.',
-      );
 }
 
 class _Editor extends ConsumerStatefulWidget {
@@ -146,18 +136,11 @@ class _Header extends ConsumerWidget {
               final tag = await promptForTag(context);
               if (tag != null) await vault.addTag(note, tag);
             },
-            child: Text(
-              '#',
-              style: JotText.mono(
-                size: 12,
-                weight: FontWeight.w500,
-                color: JotColors.textMuted,
-              ),
-            ),
+            child: JotIcon(JotIcons.tag, size: 13, color: JotColors.textMuted),
           ),
           _IconButton(
             onTap: () => _move(context, ref),
-            child: FolderGlyph(color: JotColors.textMuted, width: 11, height: 9),
+            child: JotIcon(JotIcons.move, size: 13, color: JotColors.textMuted),
           ),
           _IconButton(
             onTap: () => copyToClipboard(note.content),
