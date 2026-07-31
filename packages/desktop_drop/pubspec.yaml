@@ -1,0 +1,43 @@
+# Vendored from desktop_drop 0.7.1 (MIT, see LICENSE), with the Android, iOS
+# and web implementations removed.
+#
+# The upstream package applies the Kotlin Gradle Plugin itself, which future
+# Flutter versions will refuse to build, and it has no newer release. Drag and
+# drop is a desktop-only feature here, so the Android half was pure liability:
+# it broke `flutter build apk` while contributing nothing.
+#
+# Nothing in lib/, windows/, macos/ or linux/ was modified. Re-check upstream
+# before touching this: if 0.8 ships built-in Kotlin support, delete this
+# folder and go back to the published package.
+name: desktop_drop
+description: A plugin which allows user dragging files to your flutter desktop applications.
+version: 0.7.1
+homepage: https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  cross_file: ^0.3.4+2
+  web: ^1.1.1
+  universal_platform: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  plugin:
+    platforms:
+      macos:
+        pluginClass: DesktopDropPlugin
+      linux:
+        pluginClass: DesktopDropPlugin
+      windows:
+        pluginClass: DesktopDropPlugin

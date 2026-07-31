@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   desktop_multi_window
+  file_selector_windows
   hotkey_manager_windows
   screen_retriever_windows
   tray_manager

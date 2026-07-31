@@ -7,7 +7,7 @@ import Foundation
 
 import desktop_drop
 import desktop_multi_window
-import file_picker
+import file_selector_macos
 import hotkey_manager_macos
 import package_info_plus
 import screen_retriever_macos
@@ -18,7 +18,7 @@ import window_manager
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   DesktopDropPlugin.register(with: registry.registrar(forPlugin: "DesktopDropPlugin"))
   FlutterMultiWindowPlugin.register(with: registry.registrar(forPlugin: "FlutterMultiWindowPlugin"))
-  FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
+  FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
   HotkeyManagerMacosPlugin.register(with: registry.registrar(forPlugin: "HotkeyManagerMacosPlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
   ScreenRetrieverMacosPlugin.register(with: registry.registrar(forPlugin: "ScreenRetrieverMacosPlugin"))

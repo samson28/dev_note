@@ -26,3 +26,9 @@ linter:
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+analyzer:
+  exclude:
+    # Vendored third-party source: kept byte-identical to upstream, so its
+    # lints are not ours to fix.
+    - packages/**

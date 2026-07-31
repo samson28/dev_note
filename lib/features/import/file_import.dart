@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,16 +18,15 @@ import '../../widgets/jot_icons.dart';
 /// a list of allowed extensions exists it is wrong for somebody. What a file
 /// becomes is decided after reading it, not before choosing it.
 Future<int> pickAndImportFiles(WidgetRef ref, {String? folder}) async {
-  final result = await FilePicker.pickFiles(allowMultiple: true);
-  if (result == null) return 0;
+  // No type groups: the picker filters nothing on purpose. A list of allowed
+  // extensions is wrong for somebody the moment it exists.
+  final files = await openFiles();
+  if (files.isEmpty) return 0;
 
-  final paths = result.files
-      .map((f) => f.path)
-      .whereType<String>()
-      .toList(growable: false);
-  if (paths.isEmpty) return 0;
-
-  return ref.read(vaultProvider.notifier).importFiles(paths, folder: folder);
+  return ref.read(vaultProvider.notifier).importFiles(
+        files.map((f) => f.path),
+        folder: folder,
+      );
 }
 
 /// Hands a note back as a file, at a location the user picks.
@@ -50,11 +49,18 @@ Future<String?> pickAndExportNote(WidgetRef ref, Note note) async {
     return null;
   }
 
-  return FilePicker.saveFile(
-    dialogTitle: 'Enregistrer sous',
-    fileName: FileRepository.suggestedFileName(note),
-    bytes: Uint8List.fromList(bytes),
+  final location = await getSaveLocation(
+    suggestedName: FileRepository.suggestedFileName(note),
   );
+  if (location == null) return null;
+
+  // file_selector hands back a destination rather than writing for us, which
+  // is the honest split: it owns the dialog, we own the bytes.
+  await XFile.fromData(
+    Uint8List.fromList(bytes),
+    name: FileRepository.suggestedFileName(note),
+  ).saveTo(location.path);
+  return location.path;
 }
 
 /// Whether drag-and-drop is worth wiring up on this platform.

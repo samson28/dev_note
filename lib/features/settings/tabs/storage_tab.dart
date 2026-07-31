@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart' show showDialog;
 import 'package:flutter/widgets.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -332,8 +332,8 @@ class _StorageTabState extends ConsumerState<StorageTab> {
   Future<void> _changeVault(BuildContext context, WidgetRef ref) async {
     if (_busy != null) return;
 
-    final picked = await FilePicker.getDirectoryPath(
-      dialogTitle: 'Choisir le dossier du coffre',
+    final picked = await getDirectoryPath(
+      confirmButtonText: 'Choisir',
       initialDirectory: ref.read(servicesProvider).files.root.path,
     );
     if (picked == null || !context.mounted) return;

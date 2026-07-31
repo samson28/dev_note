@@ -50,12 +50,13 @@ dependencies:
   flutter_riverpod: ^2.6.1
   uuid: ^4.6.0
   lucide_icons_flutter: ^3.1.15
-  file_picker: ^11.0.3
-  desktop_drop: ^0.7.1
+  # Vendored under packages/ minus its Android half — see that pubspec.
+  desktop_drop:
+    path: packages/desktop_drop
   url_launcher: ^6.3.2
   tray_manager: ^0.5.3
-  package_info_plus: ^9.0.1
-
+  package_info_plus: ^10.2.1
+  file_selector: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
