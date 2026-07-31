@@ -115,11 +115,10 @@ class _SearchPaletteState extends ConsumerState<SearchPalette> {
       0.0,
       _scroll.position.maxScrollExtent,
     );
-    _scroll.animateTo(
-      target,
-      duration: const Duration(milliseconds: 90),
-      curve: Curves.easeOut,
-    );
+    // Not animated: this fires on the arrow keys, which repeat faster than any
+    // animation can finish. Each one would supersede the last and the view
+    // would trail the highlighted row for as long as the key is held.
+    _scroll.jumpTo(target);
   }
 
   Future<void> _createFromQuery() async {

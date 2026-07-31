@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart' show SelectableText;
@@ -498,30 +499,39 @@ class BlinkingCaret extends StatefulWidget {
   State<BlinkingCaret> createState() => _BlinkingCaretState();
 }
 
-class _BlinkingCaretState extends State<BlinkingCaret>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1100),
-  )..repeat();
+/// A timer rather than an [AnimationController].
+///
+/// The value consumed here is binary, so a ticker rebuilt this widget sixty
+/// times a second to produce two changes per cycle — and the animated
+/// [Opacity] forced a `saveLayer` on every one of those frames, forever, in
+/// both the JSON viewer and the shortcut capture field.
+class _BlinkingCaretState extends State<BlinkingCaret> {
+  static const _halfPeriod = Duration(milliseconds: 550);
+
+  Timer? _timer;
+  bool _on = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(_halfPeriod, (_) {
+      if (mounted) setState(() => _on = !_on);
+    });
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) => Opacity(
-          opacity: _controller.value < 0.5 ? 1 : 0,
-          child: Container(
-            width: widget.width,
-            height: widget.height,
-            color: JotColors.accent,
-          ),
-        ),
+  Widget build(BuildContext context) => SizedBox(
+        width: widget.width,
+        height: widget.height,
+        // Swapping the fill in and out beats fading it: no layer, and the
+        // caret was never meant to be seen mid-fade anyway.
+        child: _on ? ColoredBox(color: JotColors.accent) : null,
       );
 }
 

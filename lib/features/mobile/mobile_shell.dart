@@ -169,8 +169,10 @@ class _MobileListScreenState extends ConsumerState<MobileListScreen> {
           ],
         ),
           ),
-          if (_drawerOpen)
-            MobileDrawer(onClose: () => setState(() => _drawerOpen = false)),
+          MobileDrawer(
+            open: _drawerOpen,
+            onClose: () => setState(() => _drawerOpen = false),
+          ),
         ],
       ),
     );

@@ -17,26 +17,48 @@ import 'mobile_trash.dart';
 /// et au bouton de capture". That keeps the one-thumb capture button
 /// unobstructed, which is the whole point of the bottom bar.
 class MobileDrawer extends ConsumerWidget {
-  const MobileDrawer({super.key, required this.onClose});
+  const MobileDrawer({super.key, required this.open, required this.onClose});
 
+  /// Kept mounted while closed so it can animate out as well as in. Off-screen
+  /// and inert in that state — a drawer that pops into place has no business
+  /// carrying a shadow that promises depth.
+  final bool open;
   final VoidCallback onClose;
+
+  /// Short enough to stay out of the way, long enough to read as coming from
+  /// the edge. `easeOutCubic` because the arrival is what the eye follows.
+  static const _duration = Duration(milliseconds: 200);
+  static const _curve = Curves.easeOutCubic;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(vaultProvider);
     final width = MediaQuery.sizeOf(context).width * 0.82;
 
-    return Stack(
+    return IgnorePointer(
+      ignoring: !open,
+      child: Stack(
       children: [
         Positioned.fill(
-          child: GestureDetector(
-            onTap: onClose,
-            child: ColoredBox(color: JotColors.scrim),
+          child: AnimatedOpacity(
+            opacity: open ? 1 : 0,
+            duration: _duration,
+            curve: _curve,
+            child: GestureDetector(
+              onTap: onClose,
+              child: ColoredBox(color: JotColors.scrim),
+            ),
           ),
         ),
         Align(
           alignment: Alignment.centerLeft,
-          child: SizedBox(
+          child: AnimatedSlide(
+            // Retargets from wherever it currently sits, so a close during the
+            // opening slide reverses rather than restarting.
+            offset: open ? Offset.zero : const Offset(-1, 0),
+            duration: _duration,
+            curve: _curve,
+            child: SizedBox(
             width: width,
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -160,8 +182,10 @@ class MobileDrawer extends ConsumerWidget {
               ),
             ),
           ),
+          ),
         ),
       ],
+      ),
     );
   }
 }
