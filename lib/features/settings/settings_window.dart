@@ -3,6 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../widgets/jot_icons.dart';
+import 'dart:io';
+
+import '../../core/app_version.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../widgets/jot_primitives.dart';
 import 'tabs/about_tab.dart';
@@ -167,7 +170,8 @@ class _Nav extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(10),
               child: Text(
-                'Dev Note 1.4.0, Flutter 3.44\nWindows 11, x64',
+                'Dev Note ${AppVersion.full}\n'
+                '${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
                 style: JotText.mono(size: 10.5, height: 1.5, color: JotColors.textDisabled),
               ),
             ),

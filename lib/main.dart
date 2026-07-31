@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/app_version.dart';
 import 'core/models/app_settings.dart';
 import 'core/theme/jot_theme.dart';
 import 'state/settings_notifier.dart';
@@ -53,6 +54,7 @@ Future<void> main(List<String> args) async {
     await configureMobilePreviewWindow();
   }
 
+  await AppVersion.load();
   final services = await JotServices.boot();
 
   if (isDesktop) {

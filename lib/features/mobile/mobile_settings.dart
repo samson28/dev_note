@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' show MaterialPageRoute, Scaffold;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/app_version.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../state/settings_notifier.dart';
 import '../../state/vault_notifier.dart';
@@ -99,7 +100,7 @@ class MobileSettingsScreen extends ConsumerWidget {
                     rows: [
                       MobileRow(
                         label: 'À propos',
-                        value: '1.4.0',
+                        value: AppVersion.name,
                         onTap: () => _push(context, const MobileAboutScreen()),
                       ),
                     ],
@@ -301,7 +302,7 @@ class _AppCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Dev Note 1.4.0',
+                    'Dev Note ${AppVersion.name}',
                     style: JotText.ui(
                       size: 14,
                       weight: FontWeight.w600,

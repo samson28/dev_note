@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/app_settings.dart';
+import '../../../core/app_version.dart';
 import '../../../core/theme/jot_theme.dart';
 import '../../../state/settings_notifier.dart';
 import '../../../widgets/app_mark.dart';
@@ -15,10 +16,10 @@ import '../widgets/settings_controls.dart';
 class AboutTab extends ConsumerWidget {
   const AboutTab({super.key});
 
-  static const version = '1.4.0';
+  static String get version => AppVersion.name;
 
   // Not named `build`: that would collide with the widget's own build method.
-  static const buildNumber = '1402';
+  static String get buildNumber => AppVersion.build;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' show Scaffold, showDialog;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/app_version.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../core/utils/jot_format.dart';
 import '../../data/vault_paths.dart';
@@ -276,7 +277,7 @@ class MobileAboutScreen extends StatelessWidget {
         children: [
           MobileSection(
             rows: [
-              MobileRow(label: 'Version', value: '1.4.0'),
+              MobileRow(label: 'Version', value: AppVersion.full),
               MobileRow(label: 'Système', value: Platform.operatingSystem),
               MobileRow(label: 'Stockage', value: 'Fichiers .md locaux'),
               MobileRow(label: 'Recherche', value: 'SQLite FTS5'),
