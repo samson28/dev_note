@@ -21,6 +21,7 @@ import '../../widgets/note_body.dart';
 import '../../widgets/note_card.dart';
 import '../../widgets/type_badge.dart';
 import 'mobile_action_sheet.dart';
+import 'mobile_capture_sheet.dart';
 import 'mobile_drawer.dart';
 import '../main_window/widgets/note_context_menu.dart';
 import '../main_window/widgets/prompt_dialog.dart';
@@ -120,13 +121,8 @@ class _MobileListScreenState extends ConsumerState<MobileListScreen> {
     );
   }
 
-  Future<void> _create(BuildContext context) async {
-    final note = await ref.read(vaultProvider.notifier).create();
-    if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => MobileDetailScreen(noteId: note.id)),
-    );
-  }
+  Future<void> _create(BuildContext context) =>
+      showCaptureSheet(context, ref);
 }
 
 class _Header extends ConsumerWidget {
