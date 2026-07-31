@@ -29,13 +29,18 @@ class TrashedNote {
     required this.file,
     required this.originalPath,
     required this.deletedAt,
-  });
+    String? title,
+  }) : _title = title;
 
   final File file;
   final String originalPath;
   final DateTime deletedAt;
+  final String? _title;
 
-  String get title => p.basenameWithoutExtension(originalPath);
+  /// The note's own title, falling back to the file name when the frontmatter
+  /// could not be read.
+  String get title =>
+      _title ?? p.basenameWithoutExtension(originalPath);
 }
 
 /// Reads and writes the vault: one `.md` file per note, YAML frontmatter on
@@ -285,10 +290,22 @@ class FileRepository {
       final stamp = int.tryParse(name.substring(0, split));
       if (stamp == null) continue;
 
+      // Read the frontmatter title: restoring is a decision about a note, and
+      // a slugified filename is not what the user called it.
+      String? title;
+      try {
+        final (frontmatter, body) = _split(await entity.readAsString());
+        final map = frontmatter == null ? const {} : _parseYaml(frontmatter);
+        title = _string(map['title']) ?? _titleFromBody(body);
+      } on Object {
+        title = null;
+      }
+
       entries.add(TrashedNote(
         file: entity,
         originalPath: name.substring(split + 1).replaceAll('!', '/'),
         deletedAt: DateTime.fromMillisecondsSinceEpoch(stamp),
+        title: title,
       ));
     }
 

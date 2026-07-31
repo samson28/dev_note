@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../core/models/note.dart';
 import '../core/models/note_type.dart';
+import '../data/file_repository.dart';
 import 'jot_services.dart';
 
 /// What the sidebar is currently filtering by.
@@ -31,6 +32,14 @@ class TagScope extends Scope {
   final String tag;
   @override
   String get label => '#$tag';
+}
+
+/// The trash. Deleted notes keep their file on disk under `.trash/` until the
+/// retention window expires, so this is a real place, not a filter.
+class TrashScope extends Scope {
+  const TrashScope();
+  @override
+  String get label => 'Corbeille';
 }
 
 @immutable
@@ -151,7 +160,26 @@ class VaultNotifier extends Notifier<VaultState> {
   Future<List<Note>> _notesForScope(Scope scope) => switch (scope) {
     FolderScope(:final folder) => _services.index.listNotes(folder: folder),
     TagScope(:final tag) => _services.index.listNotes(tag: tag),
+    // Trashed notes are not in the index; the pane reads them from disk.
+    TrashScope() => Future.value(const <Note>[]),
   };
+
+  /// Notes currently in the trash, newest deletion first.
+  Future<List<TrashedNote>> loadTrash() => _services.files.listTrash();
+
+  Future<void> restoreFromTrash(TrashedNote trashed) async {
+    await _services.files.restore(trashed);
+    await refresh();
+  }
+
+  Future<void> purgeFromTrash(TrashedNote trashed) async {
+    if (await trashed.file.exists()) await trashed.file.delete();
+  }
+
+  Future<void> emptyTrash() async {
+    await _services.files.emptyTrash();
+    await refresh();
+  }
 
   Future<void> selectScope(Scope scope) async {
     state = state.copyWith(scope: scope, clearOpenNote: true);
@@ -199,9 +227,9 @@ class VaultNotifier extends Notifier<VaultState> {
     final target = folder ??
         switch (state.scope) {
           FolderScope(folder: final current) => current,
-          // A tag is not a place on disk — new notes from a tag view land in
-          // Inbox, which is where the user can always find them again.
-          TagScope() => Folder.inbox,
+          // Neither a tag nor the trash is a place to create in: new notes
+          // land in Inbox, where the user can always find them again.
+          TagScope() || TrashScope() => Folder.inbox,
         };
 
     final note = await _services.files.create(

@@ -73,6 +73,10 @@ class Sidebar extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: _TrashRow(active: state.scope is TrashScope),
+                  ),
                   if (state.tags.isNotEmpty) ...[
                     const Padding(
                       padding: EdgeInsets.fromLTRB(12, 20, 12, 6),
@@ -279,6 +283,66 @@ class _FolderRow extends StatelessWidget {
             ),
           );
         },
+      );
+}
+
+/// Sits under the folders: the trash is a destination, not a folder, so it
+/// gets its own row rather than appearing in the folder list.
+class _TrashRow extends ConsumerWidget {
+  const _TrashRow({required this.active});
+
+  final bool active;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => Hoverable(
+        onTap: () =>
+            ref.read(vaultProvider.notifier).selectScope(const TrashScope()),
+        builder: (context, hovered) => Container(
+          height: JotMetrics.sidebarRowHeight,
+          decoration: BoxDecoration(
+            color: active
+                ? JotColors.accentWashSidebar
+                : (hovered ? JotColors.neutralWash : null),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              if (active)
+                Positioned(
+                  left: 0,
+                  top: 7,
+                  bottom: 7,
+                  width: 2,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: JotColors.accent,
+                      borderRadius: const BorderRadius.all(Radius.circular(2)),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    FolderGlyph(
+                      color: active ? JotColors.accent : JotColors.textGhost,
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        'Corbeille',
+                        style: active
+                            ? JotText.sidebarRowActive
+                            : JotText.sidebarRow.copyWith(color: JotColors.textDim),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       );
 }
 

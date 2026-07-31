@@ -41,7 +41,12 @@ class JotTitleBar extends StatelessWidget {
                       const SizedBox(width: 10),
                       Flexible(
                         child: Text(
-                          '$scopeLabel, $noteCount note${noteCount == 1 ? '' : 's'}',
+                          // The trash keeps its own count, which this pane
+                          // does not hold; showing "0 notes" there would be a
+                          // plain lie.
+                          noteCount < 0
+                              ? scopeLabel
+                              : '$scopeLabel, $noteCount note${noteCount == 1 ? '' : 's'}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: JotText.windowSubtitle,

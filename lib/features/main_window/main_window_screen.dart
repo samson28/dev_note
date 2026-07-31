@@ -20,6 +20,7 @@ import 'widgets/editor_pane.dart';
 import 'widgets/note_list_pane.dart';
 import 'widgets/sidebar.dart';
 import 'widgets/title_bar.dart';
+import 'widgets/trash_pane.dart';
 
 /// The desktop shell: title bar on top, three columns below, with the search
 /// palette (and, if needed, the capture fallback) layered over everything.
@@ -61,15 +62,17 @@ class _MainWindowScreenState extends ConsumerState<MainWindowScreen> {
           children: [
             JotTitleBar(
               scopeLabel: state.scope.label,
-              noteCount: state.notes.length,
+              noteCount: state.scope is TrashScope ? -1 : state.notes.length,
             ),
             if (state.notice != null) _NoticeBar(message: state.notice!),
             Expanded(
               child: Stack(
                 children: [
-                  const Row(
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [Sidebar(), NoteListPane(), EditorPane()],
+                    children: state.scope is TrashScope
+                        ? const [Sidebar(), TrashPane()]
+                        : const [Sidebar(), NoteListPane(), EditorPane()],
                   ),
                   if (paletteOpen) const SearchPalette(),
                   if (_captureOverlay)
