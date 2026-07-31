@@ -21,10 +21,15 @@ class AboutTab extends ConsumerWidget {
   // Not named `build`: that would collide with the widget's own build method.
   static String get buildNumber => AppVersion.build;
 
+  /// Copied to the clipboard rather than opened: the app has no business
+  /// launching a browser on a screen whose whole point is that nothing here
+  /// talks to the network.
+  static const releasesUrl =
+      'https://github.com/sbadayodi/dev-note/releases';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    final notifier = ref.read(settingsProvider.notifier);
 
     return SettingsPane(
       gap: 18,
@@ -58,48 +63,17 @@ class AboutTab extends ConsumerWidget {
           children: [
             SettingRow(
               label: 'Mises à jour',
-              help: 'Dev Note ne contacte aucun serveur, les mises à jour sont manuelles.',
+              help: "Dev Note ne contacte aucun serveur. Les nouvelles versions "
+                  "s'installent en remplaçant le dossier de l'application ; vos "
+                  "notes vivent ailleurs et ne sont jamais touchées.",
               trailing: [
-                JotSegmented<UpdateChannel>(
-                  options: UpdateChannel.values,
-                  value: settings.updateChannel,
-                  labelOf: (c) => c.label,
-                  onChanged: (c) => notifier.update((s) => s.copyWith(updateChannel: c)),
-                ),
-              ],
-            ),
-            SettingRow(
-              label: 'Installer automatiquement au redémarrage',
-              trailing: [
-                JotSwitch(
-                  value: settings.autoInstallUpdates,
-                  onChanged: (v) =>
-                      notifier.update((s) => s.copyWith(autoInstallUpdates: v)),
+                JotRowButton(
+                  label: 'Voir les releases',
+                  onTap: () => copyToClipboard(releasesUrl),
                 ),
               ],
             ),
           ],
-        ),
-        SettingsSection(
-          title: 'Nouveautés $version',
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-            decoration: BoxDecoration(
-              color: JotColors.codePanel,
-              border: Border.all(color: JotColors.borderEditor),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                _Change.added('Repli/dépli du JSON par nœud, avec compteur de clés masquées.'),
-                SizedBox(height: 8),
-                _Change.added('Filtres par type dans la palette de recherche.'),
-                SizedBox(height: 8),
-                _Change.changed('Corbeille avec purge automatique et restauration.'),
-              ],
-            ),
-          ),
         ),
         Row(
           children: [
@@ -135,36 +109,4 @@ class AboutTab extends ConsumerWidget {
     // alongside the fonts so the licence travels with the binary.
     copyToClipboard('assets/fonts/OFL.txt : JetBrains Mono, SIL Open Font License 1.1');
   }
-}
-
-class _Change extends StatelessWidget {
-  const _Change.added(this.text) : marker = '+', accent = true;
-  const _Change.changed(this.text) : marker = '~', accent = false;
-
-  final String text;
-  final String marker;
-  final bool accent;
-
-  @override
-  Widget build(BuildContext context) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            marker,
-            style: JotText.mono(
-              size: 11,
-              height: 1.5,
-              weight: FontWeight.w500,
-              color: accent ? JotColors.accent : JotColors.textDim,
-            ),
-          ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Text(
-              text,
-              style: JotText.ui(size: 12.5, height: 1.5, color: JotColors.textBody),
-            ),
-          ),
-        ],
-      );
 }

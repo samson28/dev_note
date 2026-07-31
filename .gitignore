@@ -70,6 +70,7 @@ windows/flutter/ephemeral/
 *.err
 *.out
 graphify-out/
+dist/
 *.apk
 *.aab
 *.msix
