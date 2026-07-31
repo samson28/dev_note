@@ -525,6 +525,18 @@ void main() {
       expect(FileRepository.suggestedFileName(read), 'notes.json');
     });
 
+    test('an attachment falls back to its stored name, never to .bin', () async {
+      // Notes imported before the `source:` key existed have no sourceName,
+      // but the copy in the vault still carries the name the user knew. The
+      // save dialog must offer that, not a slug with a made-up extension.
+      final note = await files.importFile(
+        at('Contrat Ouaga (1).pdf')..writeAsBytesSync([0x25, 0x50, 0x00, 1]),
+      );
+      final legacy = note.copyWith(sourceName: '');
+
+      expect(FileRepository.suggestedFileName(legacy), 'Contrat Ouaga (1).pdf');
+    });
+
     test('a note typed in the app gets a name from its title and type',
         () async {
       final note = await files.create(

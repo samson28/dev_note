@@ -7,6 +7,7 @@ import 'package:yaml/yaml.dart';
 
 import '../core/models/note.dart';
 import '../core/models/note_type.dart';
+import '../core/utils/jot_format.dart';
 import 'vault_paths.dart';
 
 /// A failure that should surface to the user without taking the app down.
@@ -388,7 +389,7 @@ class FileRepository {
       type: NoteType.file,
       // The body is what search matches on, so it holds the words a person
       // would actually type looking for this file.
-      content: '$name\n${_extensionLabel(name)}, ${_humanBytes(length)}',
+      content: '$name\n${_extensionLabel(name)}, ${JotFormat.bytes(length)}',
       folder: folder,
       tags: tags,
       created: now,
@@ -431,6 +432,13 @@ class FileRepository {
     final source = note.sourceName;
     if (source != null && source.trim().isNotEmpty) return source;
 
+    // An attachment carries its original name in the stored file, which is
+    // authoritative even when `source:` is missing — as it is for anything
+    // imported before that key existed. Without this the app offers `.bin`
+    // for a file it can plainly see is a PDF.
+    final attachment = note.attachmentName;
+    if (attachment != null && attachment.trim().isNotEmpty) return attachment;
+
     final base = VaultPaths.slugify(note.title);
     return '$base${_extensionFor(note.type)}';
   }
@@ -463,11 +471,6 @@ class FileRepository {
     return ext.isEmpty ? 'Fichier' : ext;
   }
 
-  static String _humanBytes(int size) {
-    if (size < 1024) return '$size o';
-    if (size < 1024 * 1024) return '${(size / 1024).toStringAsFixed(1)} Ko';
-    return '${(size / (1024 * 1024)).toStringAsFixed(1)} Mo';
-  }
 
   /// Deletes attachment files no note points at any more.
   ///
