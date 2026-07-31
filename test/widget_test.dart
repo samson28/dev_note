@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jot/core/models/note.dart';
-import 'package:jot/core/models/note_type.dart';
-import 'package:jot/data/file_repository.dart';
+import 'package:dev_note/core/models/note.dart';
+import 'package:dev_note/core/models/note_type.dart';
+import 'package:dev_note/data/file_repository.dart';
 
 void main() {
   group('NoteTypeDetector', () {

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/app_settings.dart';
 import '../../../core/theme/jot_theme.dart';
 import '../../../state/settings_notifier.dart';
+import '../../../widgets/app_mark.dart';
 import '../../../widgets/json_viewer.dart' show copyToClipboard;
 import '../settings_window.dart';
 import '../widgets/settings_controls.dart';
@@ -30,29 +31,13 @@ class AboutTab extends ConsumerWidget {
       sections: [
         Row(
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: JotColors.accent,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'J',
-                style: JotText.ui(
-                  size: 22,
-                  weight: FontWeight.w600,
-                  color: JotColors.onAccent,
-                ),
-              ),
-            ),
+            const AppMark(size: 52),
             const SizedBox(width: 14),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Jot',
+                  'Dev Note',
                   style: JotText.ui(
                     size: 17,
                     weight: FontWeight.w600,
@@ -72,7 +57,7 @@ class AboutTab extends ConsumerWidget {
           children: [
             SettingRow(
               label: 'Mises à jour',
-              help: 'Jot ne contacte aucun serveur, les mises à jour sont manuelles.',
+              help: 'Dev Note ne contacte aucun serveur, les mises à jour sont manuelles.',
               trailing: [
                 JotSegmented<UpdateChannel>(
                   options: UpdateChannel.values,
@@ -138,7 +123,7 @@ class AboutTab extends ConsumerWidget {
   }
 
   static String _systemInfo(AppSettings settings) => [
-        'Jot $version (build $buildNumber)',
+        'Dev Note $version (build $buildNumber)',
         'Canal : ${settings.updateChannel.label}',
         'OS : ${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
         'Dart : ${Platform.version}',

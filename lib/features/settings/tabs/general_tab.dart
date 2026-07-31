@@ -30,7 +30,7 @@ class GeneralTab extends ConsumerWidget {
           child: SettingsCard(
             children: [
               SettingRow(
-                label: 'Lancer Jot au démarrage de Windows',
+                label: 'Lancer Dev Note au démarrage de Windows',
                 help: 'Démarre en arrière-plan, icône dans la zone de notification.',
                 trailing: [
                   JotSwitch(

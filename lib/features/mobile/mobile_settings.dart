@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../state/settings_notifier.dart';
 import '../../state/vault_notifier.dart';
+import '../../widgets/app_mark.dart';
 import '../../widgets/jot_icons.dart';
 import '../../widgets/jot_primitives.dart';
 import '../settings/widgets/settings_controls.dart';
@@ -293,30 +294,14 @@ class _AppCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 42,
-              height: 42,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: JotColors.accent,
-                borderRadius: BorderRadius.circular(11),
-              ),
-              child: Text(
-                'J',
-                style: JotText.ui(
-                  size: 19,
-                  weight: FontWeight.w600,
-                  color: JotColors.onAccent,
-                ),
-              ),
-            ),
+            const AppMark(size: 42),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Jot 1.4.0',
+                    'Dev Note 1.4.0',
                     style: JotText.ui(
                       size: 14,
                       weight: FontWeight.w600,

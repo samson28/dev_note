@@ -138,7 +138,7 @@ class JotApp extends ConsumerWidget {
     );
 
     return MaterialApp(
-      title: 'Jot',
+      title: 'Dev Note',
       debugShowCheckedModeBanner: false,
       theme: JotTheme.build(),
       // The palette is a mutable global, so swapping it marks nothing dirty:

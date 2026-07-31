@@ -44,6 +44,10 @@ class JotServices {
       await SampleNotes.seed(files);
     }
 
+    // Before the settings are read, not after: the app was renamed and the
+    // preferences are sitting in the directory the old name resolved to.
+    await VaultPaths.migrateLegacySupportDirectory();
+
     final settings = await SettingsRepository.open();
     final initialSettings = await settings.load();
 
@@ -85,7 +89,7 @@ class JotServices {
       await index.synchronise();
       return (db, index);
     } on Object catch (e) {
-      debugPrint('Jot: index inutilisable ($e), reconstruction complète');
+      debugPrint('Dev Note: index inutilisable ($e), reconstruction complète');
 
       // Close the broken connection first. Opening a second one over the same
       // file while the first is live races on the executor and hangs the boot.

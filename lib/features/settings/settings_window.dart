@@ -167,7 +167,7 @@ class _Nav extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(10),
               child: Text(
-                'Jot 1.4.0, Flutter 3.44\nWindows 11, x64',
+                'Dev Note 1.4.0, Flutter 3.44\nWindows 11, x64',
                 style: JotText.mono(size: 10.5, height: 1.5, color: JotColors.textDisabled),
               ),
             ),

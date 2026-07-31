@@ -52,7 +52,7 @@ class MobileDrawer extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              'Jot',
+                              'Dev Note',
                               style: JotText.ui(
                                 size: 19,
                                 weight: FontWeight.w600,

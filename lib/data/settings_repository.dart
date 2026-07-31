@@ -32,7 +32,7 @@ class SettingsRepository {
       if (decoded is! Map) return const AppSettings();
       return AppSettings.fromJson(Map<String, dynamic>.from(decoded));
     } on Object catch (e) {
-      debugPrint('Jot: réglages illisibles ($e) — valeurs par défaut');
+      debugPrint('Dev Note: réglages illisibles ($e) — valeurs par défaut');
       return const AppSettings();
     }
   }
@@ -44,7 +44,7 @@ class SettingsRepository {
       await temp.writeAsString(encoder.convert(settings.toJson()), flush: true);
       await temp.rename(file.path);
     } on Object catch (e) {
-      debugPrint('Jot: impossible d\'enregistrer les réglages ($e)');
+      debugPrint('Dev Note: impossible d\'enregistrer les réglages ($e)');
     }
   }
 }

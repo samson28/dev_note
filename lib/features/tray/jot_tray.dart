@@ -46,7 +46,7 @@ class JotTray with TrayListener, WindowListener {
 
     try {
       await trayManager.setIcon('assets/icons/tray.ico');
-      await trayManager.setToolTip('Jot');
+      await trayManager.setToolTip('Dev Note');
       await _buildMenu();
 
       trayManager.addListener(this);
@@ -57,7 +57,7 @@ class JotTray with TrayListener, WindowListener {
       _installed = true;
     } on Object catch (e) {
       // A missing tray (some Linux sessions have none) must not stop the app.
-      debugPrint('Jot: zone de notification indisponible ($e)');
+      debugPrint('Dev Note: zone de notification indisponible ($e)');
     }
   }
 
@@ -70,7 +70,7 @@ class JotTray with TrayListener, WindowListener {
                   ? 'Capture rapide'
                   : 'Capture rapide\t$_captureShortcut',
             ),
-            MenuItem(key: _show, label: 'Ouvrir Jot'),
+            MenuItem(key: _show, label: 'Ouvrir Dev Note'),
             MenuItem.separator(),
             MenuItem(key: _settings, label: 'Réglages'),
             MenuItem.separator(),

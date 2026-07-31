@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../../core/theme/jot_theme.dart';
+import '../../../widgets/app_mark.dart';
 import '../../../widgets/jot_icons.dart';
 import '../../../widgets/jot_primitives.dart';
 
@@ -29,16 +30,9 @@ class JotTitleBar extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 14),
                   child: Row(
                     children: [
-                      Container(
-                        width: 15,
-                        height: 15,
-                        decoration: BoxDecoration(
-                          color: JotColors.accent,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
+                      const AppMark(size: 15),
                       const SizedBox(width: 10),
-                      Text('Jot', style: JotText.windowTitle),
+                      Text('Dev Note', style: JotText.windowTitle),
                       const SizedBox(width: 10),
                       Flexible(
                         child: Text(

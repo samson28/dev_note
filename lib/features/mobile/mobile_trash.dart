@@ -51,7 +51,7 @@ class _MobileTrashScreenState extends ConsumerState<MobileTrashScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const MobileHeader(title: 'Corbeille', parent: 'Jot'),
+            const MobileHeader(title: 'Corbeille', parent: 'Dev Note'),
             if (entries != null && entries.isNotEmpty)
               Container(
                 padding: const EdgeInsets.fromLTRB(18, 12, 14, 12),

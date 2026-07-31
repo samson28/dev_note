@@ -11,8 +11,13 @@ abstract final class VaultPaths {
   static Directory? _cachedVault;
   static Directory? _cachedSupport;
 
+  /// Left as `JotVault` on purpose. Renaming it to match the app would strand
+  /// every note already in it, and the notes are the one thing here that is
+  /// genuinely the user's. Anyone who wants the new name can rename the
+  /// folder themselves and point the app at it.
   static const vaultFolderName = 'JotVault';
   static const indexFileName = 'index.sqlite';
+  static const settingsFileName = 'settings.json';
 
   /// True when [vault] had to create the directory, i.e. this is a brand-new
   /// install. Used to decide whether to drop in the example notes — it can
@@ -45,6 +50,39 @@ abstract final class VaultPaths {
     final support = _cachedSupport ??= await getApplicationSupportDirectory();
     if (!await support.exists()) await support.create(recursive: true);
     return File(p.join(support.path, indexFileName));
+  }
+
+  /// Carries settings over from the support directory the app used when it
+  /// was called Jot.
+  ///
+  /// Windows derives that directory from the executable's ProductName and
+  /// CompanyName, so renaming the app moved it and left the old preferences
+  /// behind. The index is not migrated: it is a cache and rebuilds itself in
+  /// milliseconds, so copying it would only risk carrying a stale one over.
+  ///
+  /// Runs once — as soon as settings exist under the new name, there is
+  /// nothing to do and this costs a single stat call.
+  static Future<bool> migrateLegacySupportDirectory() async {
+    if (!Platform.isWindows) return false;
+
+    final support = _cachedSupport ??= await getApplicationSupportDirectory();
+    final current = File(p.join(support.path, settingsFileName));
+    if (await current.exists()) return false;
+
+    final appData = Platform.environment['APPDATA'];
+    if (appData == null || appData.isEmpty) return false;
+
+    final legacy = File(p.join(appData, 'io.jot', 'jot', settingsFileName));
+    if (!await legacy.exists()) return false;
+
+    try {
+      if (!await support.exists()) await support.create(recursive: true);
+      await legacy.copy(current.path);
+      return true;
+    } on Object {
+      // A failed migration means default settings, not a failed launch.
+      return false;
+    }
   }
 
   static String? _homeDirectory() {

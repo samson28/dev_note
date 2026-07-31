@@ -70,7 +70,7 @@ abstract final class QuickCaptureLauncher {
 
     final physical = combo.physicalKey;
     if (physical == null) {
-      debugPrint('Jot: combinaison non liable ($combo)');
+      debugPrint('Dev Note: combinaison non liable ($combo)');
       return false;
     }
 
@@ -92,7 +92,7 @@ abstract final class QuickCaptureLauncher {
       _registered = combo;
       return true;
     } on Object catch (e) {
-      debugPrint('Jot: raccourci global indisponible ($e)');
+      debugPrint('Dev Note: raccourci global indisponible ($e)');
       _registered = null;
       return false;
     }
@@ -126,7 +126,7 @@ abstract final class QuickCaptureLauncher {
       await controller.show();
       return true;
     } on Object catch (e) {
-      debugPrint('Jot: capture en fenêtre séparée indisponible ($e) — repli en overlay');
+      debugPrint('Dev Note: capture en fenêtre séparée indisponible ($e) — repli en overlay');
       onFallback?.call();
       return false;
     }
@@ -153,7 +153,7 @@ Future<void> configureMainWindow() async {
     center: true,
     backgroundColor: JotColors.window,
     titleBarStyle: TitleBarStyle.hidden,
-    title: 'Jot',
+    title: 'Dev Note',
   );
 
   await windowManager.waitUntilReadyToShow(options, () async {
@@ -170,7 +170,7 @@ Future<void> configureMobilePreviewWindow() async {
     size: Size(390, 844),
     center: true,
     backgroundColor: JotColors.window,
-    title: 'Jot, aperçu mobile',
+    title: 'Dev Note, aperçu mobile',
   );
 
   await windowManager.waitUntilReadyToShow(options, () async {
@@ -192,7 +192,7 @@ Future<void> configureCaptureWindow() async {
     skipTaskbar: true,
     titleBarStyle: TitleBarStyle.hidden,
     alwaysOnTop: true,
-    title: 'Jot, capture rapide',
+    title: 'Dev Note, capture rapide',
   );
 
   await windowManager.waitUntilReadyToShow(options, () async {
