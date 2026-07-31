@@ -45,7 +45,12 @@ class JotTray with TrayListener, WindowListener {
     if (!supported || _installed) return;
 
     try {
-      await trayManager.setIcon('assets/icons/tray.ico');
+      // Windows wants an .ico; Linux hands the path to AppIndicator, which
+      // reads PNG and not ICO. Passing the wrong one fails silently into the
+      // catch below and the app simply has no tray.
+      await trayManager.setIcon(
+        Platform.isWindows ? 'assets/icons/tray.ico' : 'assets/icons/logo_64.png',
+      );
       await trayManager.setToolTip('Dev Note');
       await _buildMenu();
 
