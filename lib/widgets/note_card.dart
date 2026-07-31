@@ -139,14 +139,21 @@ class NoteListRow extends StatelessWidget {
 /// Design: `background:#1E1F23; border:1px solid #2A2C31; border-radius:10px;
 /// padding:12px 13px`, with a 2px accent left edge when pinned.
 class NoteCard extends StatelessWidget {
-  const NoteCard({super.key, required this.note, required this.onTap});
+  const NoteCard({
+    super.key,
+    required this.note,
+    required this.onTap,
+    this.onLongPress,
+  });
 
   final Note note;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) => Hoverable(
         onTap: onTap,
+        onLongPress: onLongPress,
         builder: (context, _) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
           decoration: BoxDecoration(

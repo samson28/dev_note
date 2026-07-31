@@ -233,12 +233,16 @@ class Hoverable extends StatefulWidget {
     required this.builder,
     this.onTap,
     this.onSecondaryTap,
+    this.onLongPress,
     this.cursor = SystemMouseCursors.click,
   });
 
   final Widget Function(BuildContext context, bool hovered) builder;
   final VoidCallback? onTap;
   final VoidCallback? onSecondaryTap;
+
+  /// The touch equivalent of [onSecondaryTap]: a phone has no right click.
+  final VoidCallback? onLongPress;
   final MouseCursor cursor;
 
   @override
@@ -256,6 +260,7 @@ class _HoverableState extends State<Hoverable> {
         child: GestureDetector(
           onTap: widget.onTap,
           onSecondaryTap: widget.onSecondaryTap,
+          onLongPress: widget.onLongPress,
           behavior: HitTestBehavior.opaque,
           child: widget.builder(context, _hovered),
         ),

@@ -20,6 +20,7 @@ import '../../widgets/json_viewer.dart' show copyToClipboard;
 import '../../widgets/note_body.dart';
 import '../../widgets/note_card.dart';
 import '../../widgets/type_badge.dart';
+import 'mobile_action_sheet.dart';
 import 'mobile_drawer.dart';
 import '../main_window/widgets/note_context_menu.dart';
 import '../main_window/widgets/prompt_dialog.dart';
@@ -261,7 +262,11 @@ class _NoteList extends ConsumerWidget {
             child: SectionLabel('Épinglées', small: true),
           ),
           for (final note in pinned) ...[
-            NoteCard(note: note, onTap: () => _open(context, ref, note)),
+            NoteCard(
+              note: note,
+              onTap: () => _open(context, ref, note),
+              onLongPress: () => showNoteActionSheet(context, ref, note),
+            ),
             const SizedBox(height: 9),
           ],
         ],
@@ -271,7 +276,11 @@ class _NoteList extends ConsumerWidget {
             child: SectionLabel(JotFormat.group(rest.first.modified), small: true),
           ),
           for (final note in rest) ...[
-            NoteCard(note: note, onTap: () => _open(context, ref, note)),
+            NoteCard(
+              note: note,
+              onTap: () => _open(context, ref, note),
+              onLongPress: () => showNoteActionSheet(context, ref, note),
+            ),
             const SizedBox(height: 9),
           ],
         ],
@@ -462,7 +471,12 @@ class _DetailHeader extends ConsumerWidget {
             ),
             const SizedBox(width: 8),
             Hoverable(
-              onTap: () => _rename(context, ref),
+              onTap: () async {
+                final deleted = await showNoteActionSheet(context, ref, note);
+                if (deleted && context.mounted) {
+                  await Navigator.of(context).maybePop();
+                }
+              },
               builder: (context, _) =>
                   OverflowDots(color: JotColors.textMuted, size: 18),
             ),
@@ -470,21 +484,6 @@ class _DetailHeader extends ConsumerWidget {
         ),
       );
 
-  Future<void> _rename(BuildContext context, WidgetRef ref) async {
-    final title = await showDialog<String>(
-      context: context,
-      barrierColor: JotColors.scrim,
-      builder: (_) => PromptDialog(
-        title: 'Renommer la note',
-        hint: 'Titre',
-        initialValue: note.title,
-        confirmLabel: 'Renommer',
-      ),
-    );
-    if (title != null && title.trim().isNotEmpty) {
-      await ref.read(vaultProvider.notifier).save(note.copyWith(title: title.trim()));
-    }
-  }
 }
 
 class _DetailActions extends ConsumerWidget {
@@ -507,13 +506,13 @@ class _DetailActions extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _Action(
-            glyph: '⧉',
+            icon: JotIcons.copy,
             label: 'Copier',
             accent: true,
             onTap: () => copyToClipboard(note.content),
           ),
           _Action(
-            glyph: '#',
+            icon: JotIcons.tag,
             label: 'Taguer',
             onTap: () async {
               final tag = await promptForTag(context);
@@ -522,7 +521,7 @@ class _DetailActions extends ConsumerWidget {
           ),
           _Action(
             label: 'Déplacer',
-            child: FolderGlyph(color: JotColors.textMuted),
+            icon: JotIcons.move,
             onTap: () async {
               final folders = ref.read(vaultProvider).folders.map((f) => f.name).toList();
               if (!context.mounted) return;
@@ -536,10 +535,14 @@ class _DetailActions extends ConsumerWidget {
             },
           ),
           _Action(
-            glyph: '✕',
+            icon: JotIcons.trash,
             label: 'Supprimer',
             danger: true,
+            // Confirmed, like on the desktop: deleting is one tap and there is
+            // no undo gesture on a phone to fall back on.
             onTap: () async {
+              final confirmed = await confirmDeleteNote(context, note);
+              if (confirmed != true) return;
               await vault.delete(note);
               if (context.mounted) Navigator.of(context).maybePop();
             },
@@ -554,16 +557,14 @@ class _Action extends StatelessWidget {
   const _Action({
     required this.label,
     required this.onTap,
-    this.glyph,
-    this.child,
+    required this.icon,
     this.accent = false,
     this.danger = false,
   });
 
   final String label;
   final VoidCallback onTap;
-  final String? glyph;
-  final Widget? child;
+  final IconData icon;
   final bool accent;
   final bool danger;
 
@@ -580,10 +581,7 @@ class _Action extends StatelessWidget {
         children: [
           SizedBox(
             height: 16,
-            child: Center(
-              child: child ??
-                  Text(glyph!, style: JotText.mono(size: 14, color: color)),
-            ),
+            child: Center(child: JotIcon(icon, size: 16, color: color)),
           ),
           const SizedBox(height: 5),
           Text(
