@@ -198,7 +198,14 @@ class IndexRepository {
       ])
       ..limit(limit);
 
-    if (folder != null) query.where((t) => t.folder.equals(folder));
+    // A parent shows what is under it. Selecting "Enko" and being told it is
+    // empty because everything sits in "Enko/Webhooks" would make the tree
+    // worse than the flat list it replaced.
+    if (folder != null) {
+      query.where(
+        (t) => t.folder.equals(folder) | t.folder.like('$folder/%'),
+      );
+    }
     if (tag != null) {
       query.where(
         (t) => t.tags.equals(tag.toLowerCase()) |
@@ -227,11 +234,18 @@ class IndexRepository {
       if (!names.contains(name)) names.add(name);
     }
 
+    // A parent's count includes everything beneath it, because that is what
+    // clicking it shows. A folder whose badge says 0 but which opens onto
+    // twelve notes would be worse than no badge at all.
+    int total(String name) => counts.entries
+        .where((e) => e.key == name || FileRepository.isDescendant(e.key, name))
+        .fold(0, (sum, e) => sum + e.value);
+
     return [
       for (final name in names)
         Folder(
           name: name,
-          noteCount: counts[name] ?? 0,
+          noteCount: total(name),
           muted: name == Folder.archive,
         ),
     ];
@@ -369,7 +383,11 @@ LIMIT ?
 
   bool _passes(Note note, SearchFilters f) {
     if (f.types.isNotEmpty && !f.types.contains(note.type)) return false;
-    if (f.folder != null && note.folder != f.folder) return false;
+    if (f.folder != null &&
+        note.folder != f.folder &&
+        !FileRepository.isDescendant(note.folder, f.folder!)) {
+      return false;
+    }
     if (f.tags.isNotEmpty) {
       final lower = note.tags.map((t) => t.toLowerCase()).toSet();
       if (!f.tags.every((t) => lower.contains(t.toLowerCase()))) return false;

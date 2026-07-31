@@ -178,6 +178,77 @@ void main() {
     });
   });
 
+  group('Folder tree', () {
+    late Directory root;
+    late FileRepository files;
+
+    setUp(() async {
+      root = await Directory.systemTemp.createTemp('jot_tree_');
+      files = FileRepository(root);
+      await files.ensureScaffold();
+    });
+
+    tearDown(() async {
+      if (await root.exists()) await root.delete(recursive: true);
+    });
+
+    test('children follow their parent, Inbox first and Archive last',
+        () async {
+      for (final f in const ['Enko/Webhooks', 'Enko', 'Klém', 'Enko/API']) {
+        await files.createFolder(f);
+      }
+
+      // Archive comes from the scaffold and belongs at the end.
+      expect(await files.listFolders(), [
+        'Inbox',
+        'Enko',
+        'Enko/API',
+        'Enko/Webhooks',
+        'Klém',
+        'Archive',
+      ]);
+    });
+
+    test('the Inbox/Archive ranking applies at the top level only', () async {
+      // A folder named Archive nested inside another is just a folder, and
+      // must not be dragged to the end of the whole list.
+      for (final f in const ['Enko/Archive', 'Enko/Zeta', 'Zulu']) {
+        await files.createFolder(f);
+      }
+
+      final folders = await files.listFolders();
+      expect(
+        folders.indexOf('Enko/Archive') < folders.indexOf('Enko/Zeta'),
+        isTrue,
+      );
+      expect(folders.indexOf('Enko/Zeta') < folders.indexOf('Zulu'), isTrue);
+    });
+
+    test('depth, leaf and descendant read the path the same way', () {
+      expect(FileRepository.depthOf('Inbox'), 0);
+      expect(FileRepository.depthOf('Enko/Webhooks'), 1);
+      expect(FileRepository.leafOf('Enko/Webhooks'), 'Webhooks');
+      expect(FileRepository.leafOf('Inbox'), 'Inbox');
+
+      expect(FileRepository.isDescendant('Enko/API', 'Enko'), isTrue);
+      expect(FileRepository.isDescendant('Enko', 'Enko'), isFalse);
+      // A shared prefix is not a parent: "Enkore" is not inside "Enko".
+      expect(FileRepository.isDescendant('Enkore', 'Enko'), isFalse);
+    });
+
+    test('a note filed in a sub-folder keeps its full path', () async {
+      await files.createFolder('Enko/Webhooks');
+      final note = await files.create(
+        content: 'x',
+        title: 'stripe',
+        folder: 'Enko/Webhooks',
+      );
+
+      final read = await files.read(File('${root.path}/${note.relativePath}'));
+      expect(read.folder, 'Enko/Webhooks');
+    });
+  });
+
   group('FileRepository vault move', () {
     late Directory root;
     late Directory target;

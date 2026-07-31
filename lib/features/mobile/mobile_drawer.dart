@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/jot_theme.dart';
+import '../../data/file_repository.dart';
 import '../../state/vault_notifier.dart';
 import '../../widgets/jot_icons.dart';
 import '../../widgets/jot_primitives.dart';
@@ -79,10 +80,14 @@ class MobileDrawer extends ConsumerWidget {
                             padding: EdgeInsets.fromLTRB(4, 4, 4, 8),
                             child: SectionLabel('Dossiers'),
                           ),
+                          // The phone has no room for a chevron and no hover
+                          // to reveal one, so the tree is always expanded and
+                          // depth is carried by the indent alone.
                           for (final folder in state.folders)
                             _DrawerRow(
                               icon: JotIcons.folder,
-                              label: folder.name,
+                              label: FileRepository.leafOf(folder.name),
+                              depth: FileRepository.depthOf(folder.name),
                               trailing: '${folder.noteCount}',
                               active: state.scope.isFolder(folder.name),
                               onTap: () {
@@ -168,11 +173,13 @@ class _DrawerRow extends StatelessWidget {
     required this.active,
     required this.onTap,
     this.trailing,
+    this.depth = 0,
   });
 
   final IconData icon;
   final String label;
   final String? trailing;
+  final int depth;
   final bool active;
   final VoidCallback onTap;
 
@@ -183,7 +190,7 @@ class _DrawerRow extends StatelessWidget {
           // 48px keeps every row above the 44px touch target the design asks
           // for.
           height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.only(left: 12 + depth * 16.0, right: 12),
           decoration: BoxDecoration(
             color: active
                 ? JotColors.accentWashSidebar

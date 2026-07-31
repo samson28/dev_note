@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/note.dart';
+import '../../../data/file_repository.dart';
 import '../../../core/theme/jot_theme.dart';
 import '../../../state/search_notifier.dart';
 import '../../../state/vault_notifier.dart';
@@ -13,12 +14,38 @@ import 'prompt_dialog.dart';
 
 /// Left column, 236px: the search entry point, folders, tags, and the
 /// quick-capture shortcut reminder pinned to the bottom.
-class Sidebar extends ConsumerWidget {
+class Sidebar extends ConsumerStatefulWidget {
   const Sidebar({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<Sidebar> createState() => _SidebarState();
+}
+
+class _SidebarState extends ConsumerState<Sidebar> {
+  /// Branches the user has folded away, by full path.
+  ///
+  /// Collapsed rather than expanded state, so a folder created elsewhere
+  /// shows up straight away instead of hiding until someone opens its parent.
+  final _collapsed = <String>{};
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(vaultProvider);
+
+    // One pass over the sorted flat list: a folder is hidden when any of its
+    // ancestors is folded, and carries a chevron when something sits under it.
+    final visible = <Folder>[];
+    final hasChildren = <String>{};
+    for (final folder in state.folders) {
+      for (final other in state.folders) {
+        if (FileRepository.isDescendant(other.name, folder.name)) {
+          hasChildren.add(folder.name);
+          break;
+        }
+      }
+      final hidden = _collapsed.any((c) => FileRepository.isDescendant(folder.name, c));
+      if (!hidden) visible.add(folder);
+    }
 
     return Container(
       width: JotMetrics.sidebarWidth,
@@ -63,10 +90,18 @@ class Sidebar extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        for (final folder in state.folders)
+                        for (final folder in visible)
                           _FolderRow(
                             folder: folder,
                             active: state.scope.isFolder(folder.name),
+                            depth: FileRepository.depthOf(folder.name),
+                            hasChildren: hasChildren.contains(folder.name),
+                            collapsed: _collapsed.contains(folder.name),
+                            onToggle: () => setState(() {
+                              if (!_collapsed.remove(folder.name)) {
+                                _collapsed.add(folder.name);
+                              }
+                            }),
                             onTap: () => ref
                                 .read(vaultProvider.notifier)
                                 .selectScope(FolderScope(folder.name)),
@@ -161,7 +196,9 @@ class Sidebar extends ConsumerWidget {
       barrierColor: JotColors.scrim,
       builder: (_) => const PromptDialog(
         title: 'Nouveau dossier',
-        hint: 'Nom du dossier',
+        // A slash makes a sub-folder, which is how the tree is created —
+        // there is no second dialog for nesting.
+        hint: 'Nom, ou Parent/Enfant',
         confirmLabel: 'Créer',
       ),
     );
@@ -207,11 +244,25 @@ class _SearchEntry extends ConsumerWidget {
 }
 
 class _FolderRow extends StatelessWidget {
-  const _FolderRow({required this.folder, required this.active, required this.onTap});
+  const _FolderRow({
+    required this.folder,
+    required this.active,
+    required this.onTap,
+    this.depth = 0,
+    this.hasChildren = false,
+    this.collapsed = false,
+    this.onToggle,
+  });
 
   final Folder folder;
   final bool active;
   final VoidCallback onTap;
+
+  /// 0 for a top-level folder; each level adds a fixed indent.
+  final int depth;
+  final bool hasChildren;
+  final bool collapsed;
+  final VoidCallback? onToggle;
 
   @override
   Widget build(BuildContext context) => Hoverable(
@@ -253,14 +304,31 @@ class _FolderRow extends StatelessWidget {
                     ),
                   ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: EdgeInsets.only(left: 10 + depth * 13.0, right: 10),
                   child: Row(
                     children: [
+                      // The chevron sits in the same 11px slot whether or not
+                      // there is one, so every folder icon lines up.
+                      SizedBox(
+                        width: 11,
+                        child: hasChildren
+                            ? Hoverable(
+                                onTap: onToggle,
+                                builder: (context, _) => JotIcon(
+                                  collapsed
+                                      ? JotIcons.collapsed
+                                      : JotIcons.expanded,
+                                  size: 11,
+                                  color: glyphColor,
+                                ),
+                              )
+                            : null,
+                      ),
                       FolderGlyph(color: glyphColor),
                       const SizedBox(width: 9),
                       Expanded(
                         child: Text(
-                          folder.name,
+                          FileRepository.leafOf(folder.name),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: active

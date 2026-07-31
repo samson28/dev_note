@@ -140,17 +140,43 @@ class FileRepository {
     return folders.toList()..sort(_folderOrder);
   }
 
-  /// Inbox first, Archive last, everything else alphabetically — matching the
-  /// order shown in the sidebar.
+  /// Inbox first, Archive last, everything else alphabetically — and every
+  /// sub-folder immediately under its parent, which is what lets the sidebar
+  /// draw the tree by walking a flat list once.
+  ///
+  /// The Inbox/Archive ranking applies at the top level only: an `Archive`
+  /// nested inside another folder is just a folder.
   static int _folderOrder(String a, String b) {
     int rank(String f) => switch (f) {
       Folder.inbox => 0,
       Folder.archive => 2,
       _ => 1,
     };
-    final byRank = rank(a).compareTo(rank(b));
-    return byRank != 0 ? byRank : a.toLowerCase().compareTo(b.toLowerCase());
+
+    final left = a.split('/');
+    final right = b.split('/');
+
+    for (var i = 0; i < left.length && i < right.length; i++) {
+      if (left[i] == right[i]) continue;
+      if (i == 0) {
+        final byRank = rank(left[0]).compareTo(rank(right[0]));
+        if (byRank != 0) return byRank;
+      }
+      return left[i].toLowerCase().compareTo(right[i].toLowerCase());
+    }
+    // One is a prefix of the other, so the parent comes first.
+    return left.length.compareTo(right.length);
   }
+
+  /// Depth of a folder in the tree: `Inbox` is 0, `Inbox/Enko` is 1.
+  static int depthOf(String folder) => folder.split('/').length - 1;
+
+  /// The part shown in the sidebar, without its ancestors.
+  static String leafOf(String folder) => folder.split('/').last;
+
+  /// Whether [child] sits anywhere under [parent].
+  static bool isDescendant(String child, String parent) =>
+      child.startsWith('$parent/');
 
   // ------------------------------------------------------------------- read
 

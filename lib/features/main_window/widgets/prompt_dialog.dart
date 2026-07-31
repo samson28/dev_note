@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/jot_theme.dart';
+import '../../../data/file_repository.dart';
 import '../../../widgets/jot_primitives.dart';
 
 /// Centres a floating panel and gives it the `Material` ancestor that
@@ -175,7 +176,13 @@ class FolderPickerDialog extends StatelessWidget {
                           onTap: () => Navigator.of(context).pop(folder),
                           builder: (context, hovered) => Container(
                             height: 28,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            // The picker is also used for flat lists such as
+                            // the retention choices, where every entry is at
+                            // depth 0 and nothing indents.
+                            padding: EdgeInsets.only(
+                              left: 8 + FileRepository.depthOf(folder) * 13.0,
+                              right: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: hovered ? JotColors.neutralWashMenu : null,
                               borderRadius: BorderRadius.circular(5),
@@ -192,7 +199,7 @@ class FolderPickerDialog extends StatelessWidget {
                                 const SizedBox(width: 9),
                                 Expanded(
                                   child: Text(
-                                    folder,
+                                    FileRepository.leafOf(folder),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: JotText.ui(
