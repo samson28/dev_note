@@ -416,13 +416,58 @@ class FileRepository {
     return s == null ? null : DateTime.tryParse(s);
   }
 
+  /// "Première ligne, clé racine du JSON, ou domaine de l'URL" — the design's
+  /// own description of automatic titling.
+  ///
+  /// The first line of a JSON blob is `{`, and the first line of a URL is the
+  /// whole URL: neither makes a title anyone can scan, so both get a shape of
+  /// their own before falling back to the first line.
   static String? _titleFromBody(String body) {
-    for (final line in body.split('\n')) {
-      final trimmed = line.trim().replaceFirst(RegExp(r'^#+\s*'), '');
-      if (trimmed.isEmpty) continue;
-      return trimmed.length <= 70 ? trimmed : '${trimmed.substring(0, 70)}...';
+    final trimmedBody = body.trim();
+    if (trimmedBody.isEmpty) return null;
+
+    if (trimmedBody.startsWith('{')) {
+      final key = _firstJsonKey(trimmedBody);
+      if (key != null) return key;
+    }
+
+    if (!trimmedBody.contains(RegExp(r'\s'))) {
+      final host = _urlHost(trimmedBody);
+      if (host != null) return host;
+    }
+
+    for (final line in trimmedBody.split('\n')) {
+      final line_ = line.trim().replaceFirst(RegExp(r'^#+\s*'), '');
+      if (line_.isEmpty) continue;
+      return line_.length <= 70 ? line_ : '${line_.substring(0, 70)}...';
     }
     return null;
+  }
+
+  static String? _firstJsonKey(String source) {
+    try {
+      final decoded = jsonDecode(source);
+      if (decoded is Map && decoded.isNotEmpty) {
+        final first = decoded.keys.first;
+        // A bare key is a poor title on its own; pair it with its value when
+        // the value is a short scalar.
+        final value = decoded[first];
+        if (value is String && value.length <= 40) return '$first: $value';
+        if (value is num || value is bool) return '$first: $value';
+        return '$first';
+      }
+    } on Object {
+      // Not valid JSON after all; the caller falls through to the first line.
+    }
+    return null;
+  }
+
+  static String? _urlHost(String source) {
+    final uri = Uri.tryParse(source.startsWith('http') ? source : 'https://$source');
+    final host = uri?.host;
+    if (host == null || host.isEmpty || !host.contains('.')) return null;
+    final path = uri!.path.replaceAll(RegExp(r'/+$'), '');
+    return path.isEmpty || path == '/' ? host : '$host$path';
   }
 
   /// Stable fallback id for files that have no `id:` — derived from the path

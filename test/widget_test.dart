@@ -127,6 +127,39 @@ void main() {
       expect(notes.map((n) => n.title), contains('lisible'));
     });
 
+    group('automatic title', () {
+      test('a JSON blob is titled by its root key, not by "{"', () async {
+        final note = await files.create(
+          content: '{\n  "type": "checkout.session.completed",\n  "id": 4900\n}',
+        );
+        expect(note.title, 'type: checkout.session.completed');
+      });
+
+      test('a bare URL is titled by its host and path', () async {
+        final note = await files.create(
+          content: 'https://grafana.enko.internal/d/9fbz1/api-latency',
+        );
+        expect(note.title, 'grafana.enko.internal/d/9fbz1/api-latency');
+      });
+
+      test('a URL with no path keeps just the host', () async {
+        final note = await files.create(content: 'https://dashboard.enko.dev/');
+        expect(note.title, 'dashboard.enko.dev');
+      });
+
+      test('prose still uses its first line', () async {
+        final note = await files.create(
+          content: 'Le tri par date casse en UTC+13.\nVérifier export.',
+        );
+        expect(note.title, 'Le tri par date casse en UTC+13.');
+      });
+
+      test('an explicit title always wins', () async {
+        final note = await files.create(content: '{"a": 1}', title: 'Mon titre');
+        expect(note.title, 'Mon titre');
+      });
+    });
+
     test('preview flattens the body instead of showing the first brace', () {
       final epoch = DateTime.utc(2026, 7, 30);
       final note = Note(

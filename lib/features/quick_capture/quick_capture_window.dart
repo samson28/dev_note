@@ -3,10 +3,12 @@ import 'package:flutter/material.dart'
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../core/models/app_settings.dart';
 import '../../core/models/note.dart';
 import '../../core/models/note_type.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../data/file_repository.dart';
+import '../../data/settings_repository.dart';
 import '../../widgets/code_viewer.dart';
 import '../../widgets/jot_primitives.dart';
 import '../main_window/widgets/prompt_dialog.dart';
@@ -50,10 +52,41 @@ class _QuickCaptureWindowState extends State<QuickCaptureWindow> {
   bool _saving = false;
   String? _error;
 
+  /// Read from disk rather than from a provider: this window runs in its own
+  /// engine and shares no state with the main one.
+  AppSettings _settings = const AppSettings();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _focus.requestFocus());
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final repository = await SettingsRepository.open();
+    final settings = await repository.load();
+    if (!mounted) return;
+
+    // Pre-fill before the user starts typing, never after: overwriting what
+    // they already wrote would be the opposite of a capture tool.
+    String? clipboard;
+    if (settings.prefillFromClipboard && _controller.text.isEmpty) {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      clipboard = data?.text?.trim();
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _settings = settings;
+      _folder = settings.captureFolder;
+      if (clipboard != null && clipboard.isNotEmpty && _controller.text.isEmpty) {
+        _controller.text = clipboard;
+        _controller.selection =
+            TextSelection.collapsed(offset: clipboard.length);
+        if (!_typeLocked) _type = NoteTypeDetector.detect(clipboard);
+      }
+    });
   }
 
   @override
@@ -85,12 +118,27 @@ class _QuickCaptureWindowState extends State<QuickCaptureWindow> {
       final files = await FileRepository.open();
       await files.create(
         content: content,
+        // With auto-title off the note keeps a neutral name and the body is
+        // left to speak for itself.
+        title: _settings.autoTitle ? null : 'Note rapide',
         type: _type,
         folder: _folder,
         tags: _tags,
       );
       widget.onSaved?.call();
-      await _close();
+
+      if (_settings.closeAfterSave) {
+        await _close();
+      } else if (mounted) {
+        // Stay open for a burst of captures: clear the field and keep focus.
+        setState(() {
+          _controller.clear();
+          _saving = false;
+          _type = NoteType.text;
+          _typeLocked = false;
+        });
+        _focus.requestFocus();
+      }
     } on Object catch (e) {
       // Never lose what the user typed — keep the window open with the text
       // intact and say what went wrong.
