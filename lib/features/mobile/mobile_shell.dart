@@ -14,7 +14,9 @@ import '../../widgets/jot_icons.dart';
 import '../../core/models/note_type.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../core/utils/jot_format.dart';
+import '../../data/index_repository.dart' show SearchHit;
 import '../../state/jot_services.dart';
+import '../../state/search_notifier.dart';
 import '../../state/vault_notifier.dart';
 import '../../widgets/jot_primitives.dart';
 import '../../widgets/json_viewer.dart' show copyToClipboard;
@@ -49,29 +51,65 @@ class _MobileListScreenState extends ConsumerState<MobileListScreen> {
   NoteType? _typeFilter;
   bool _drawerOpen = false;
 
+  /// Set by "Chercher partout": the next queries ignore the current scope.
+  /// Reset as soon as the field is cleared, so the scope means something
+  /// again the next time the user types.
+  bool _everywhere = false;
+
   @override
   void dispose() {
     _query.dispose();
     super.dispose();
   }
 
-  List<Note> get _visible {
-    final state = ref.watch(vaultProvider);
-    final query = _query.text.trim().toLowerCase();
+  bool get _searching => _query.text.trim().isNotEmpty;
 
-    return state.notes.where((note) {
-      if (_typeFilter != null && note.type != _typeFilter) return false;
-      if (query.isEmpty) return true;
-      return note.title.toLowerCase().contains(query) ||
-          note.preview.toLowerCase().contains(query) ||
-          note.tags.any((t) => t.contains(query));
-    }).toList();
+  /// Runs the query through the same FTS5 index the desktop palette uses.
+  ///
+  /// The list used to match substrings against the titles and previews it
+  /// already had in memory, which meant the phone found strictly less than
+  /// the desktop: no ranking, no match inside a note body longer than the
+  /// 220-character preview, and nothing at all in a folder that was not the
+  /// current scope. The index answers in under a millisecond, so there is no
+  /// reason for the phone to search differently.
+  Future<void> _onQueryChanged(String raw) async {
+    final search = ref.read(searchProvider.notifier);
+    if (raw.trim().isEmpty) _everywhere = false;
+
+    // The scope the user is looking at is part of the question: searching
+    // inside "Enko" should not surface Inbox notes, unless they asked for it.
+    if (_everywhere) {
+      await search.setFolder(null);
+      await search.clearTags();
+    } else {
+      switch (ref.read(vaultProvider).scope) {
+        case FolderScope(folder: final folder):
+          await search.setFolder(folder);
+          await search.clearTags();
+        case TagScope(tag: final tag):
+          await search.setFolder(null);
+          await search.setOnlyTag(tag);
+        case TrashScope():
+          await search.setFolder(null);
+          await search.clearTags();
+      }
+    }
+
+    await search.setQuery(raw.trim());
+    if (mounted) setState(() {});
+  }
+
+  List<Note> _visible(List<Note> scoped, List<SearchHit> hits) {
+    final source = _searching ? [for (final hit in hits) hit.note] : scoped;
+    if (_typeFilter == null) return source;
+    return source.where((n) => n.type == _typeFilter).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(vaultProvider);
-    final notes = _visible;
+    final hits = ref.watch(searchProvider.select((s) => s.results));
+    final notes = _visible(state.notes, hits);
 
     return Scaffold(
       backgroundColor: JotColors.window,
@@ -86,23 +124,39 @@ class _MobileListScreenState extends ConsumerState<MobileListScreen> {
               scope: state.scope,
               // The scope's own count, not the vault total: the number sits
               // beside the scope title and has to agree with the list under it.
-              total: state.notes.length,
+              total: _searching ? notes.length : state.notes.length,
+              scopeTotal: state.notes.length,
+              searching: _searching,
               controller: _query,
-              onQueryChanged: (_) => setState(() {}),
+              onQueryChanged: _onQueryChanged,
               typeFilter: _typeFilter,
               onTypeChanged: (type) => setState(() => _typeFilter = type),
               onMenu: () => setState(() => _drawerOpen = true),
             ),
             Expanded(
               child: notes.isEmpty
-                  ? EmptyState(
-                      title: '« ${state.scope.label} » est vide',
-                      message:
-                          'Colle un extrait, une URL ou un bout de JSON, le type est '
-                          'détecté tout seul.',
-                      primaryLabel: 'Nouvelle note',
-                      onPrimary: () => _create(context),
-                    )
+                  ? _searching
+                      // Offering "nouvelle note" here would be answering a
+                      // question the user did not ask; widening the search is
+                      // what they want next.
+                      ? EmptyState(
+                          title: 'Aucun résultat',
+                          message: 'Rien ne correspond à « ${_query.text.trim()} » '
+                              'dans « ${state.scope.label} ».',
+                          primaryLabel: 'Chercher partout',
+                          onPrimary: () async {
+                            _everywhere = true;
+                            await _onQueryChanged(_query.text);
+                          },
+                        )
+                      : EmptyState(
+                          title: '« ${state.scope.label} » est vide',
+                          message:
+                              'Colle un extrait, une URL ou un bout de JSON, le type est '
+                              'détecté tout seul.',
+                          primaryLabel: 'Nouvelle note',
+                          onPrimary: () => _create(context),
+                        )
                   : _NoteList(notes: notes),
             ),
             _BottomBar(
@@ -130,6 +184,8 @@ class _Header extends ConsumerWidget {
   const _Header({
     required this.scope,
     required this.total,
+    required this.scopeTotal,
+    required this.searching,
     required this.controller,
     required this.onQueryChanged,
     required this.typeFilter,
@@ -140,7 +196,13 @@ class _Header extends ConsumerWidget {
   final VoidCallback onMenu;
 
   final Scope scope;
+
+  /// What the list below is showing: results while searching, notes otherwise.
   final int total;
+
+  /// How many notes the scope holds, which is what the field offers to search.
+  final int scopeTotal;
+  final bool searching;
   final TextEditingController controller;
   final ValueChanged<String> onQueryChanged;
   final NoteType? typeFilter;
@@ -156,7 +218,7 @@ class _Header extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    scope.label,
+                    searching ? 'Résultats' : scope.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: JotText.ui(
@@ -208,7 +270,7 @@ class _Header extends ConsumerWidget {
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         isCollapsed: true,
-                        hintText: 'Rechercher dans $total notes',
+                        hintText: 'Rechercher dans $scopeTotal notes',
                         hintStyle: JotText.ui(size: 13.5, color: JotColors.textSubtle),
                       ),
                     ),

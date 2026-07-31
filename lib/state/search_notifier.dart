@@ -128,6 +128,30 @@ class SearchNotifier extends Notifier<SearchState> {
     await _run();
   }
 
+  /// Replaces the tag filter with exactly [tag].
+  ///
+  /// [toggleTag] is what the palette's chips need; a scope is not a toggle,
+  /// it is the one tag being looked at.
+  Future<void> setOnlyTag(String tag) async {
+    if (state.filters.tags.length == 1 && state.filters.tags.contains(tag)) {
+      return;
+    }
+    state = state.copyWith(
+      filters: state.filters.copyWith(tags: {tag}),
+      selectedIndex: 0,
+    );
+    await _run();
+  }
+
+  Future<void> clearTags() async {
+    if (state.filters.tags.isEmpty) return;
+    state = state.copyWith(
+      filters: state.filters.copyWith(tags: const {}),
+      selectedIndex: 0,
+    );
+    await _run();
+  }
+
   /// "Chercher partout" on the empty state.
   Future<void> clearFilters() async {
     state = state.copyWith(
