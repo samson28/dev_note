@@ -116,6 +116,15 @@ flutter build windows --release
 
 Le résultat est dans `build/windows/x64/runner/Release/`. **Distribuez le dossier entier**, pas seulement le `.exe` : il a besoin de `data/` et des DLL à côté de lui.
 
+Pour un installateur Windows plutôt qu'un zip, avec [Inno Setup](https://jrsoftware.org/isinfo.php) installé :
+
+```bash
+flutter build windows --release
+iscc installer/dev_note.iss
+```
+
+Le résultat est écrit dans `dist/dev_note-<version>-setup.exe`, non versionné. L'installateur n'exige pas de droits administrateur, propose une icône bureau et un lancement au démarrage en options, et son désinstalleur ne touche jamais `~/JotVault/` : les notes vivent en dehors du dossier d'installation.
+
 Autres plateformes :
 
 ```bash
