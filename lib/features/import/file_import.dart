@@ -72,12 +72,25 @@ bool get supportsFileDrop =>
 /// Drag-and-drop is the fastest way in, no dialog, no folder navigation -
 /// so it needs an unmistakable target, not a subtle highlight.
 class DropTargetOverlay extends StatelessWidget {
-  const DropTargetOverlay({super.key});
+  const DropTargetOverlay({super.key, this.opacity = 1});
+
+  /// Animated by the caller. Kept as a plain value rather than the caller
+  /// wrapping this widget in its own AnimatedOpacity: `Positioned` has to
+  /// stay the direct child of the enclosing `Stack`, and AnimatedOpacity
+  /// (which renders as an `Opacity` RenderObjectWidget) sitting between them
+  /// breaks Stack's parent-data application — that crashed the whole first
+  /// frame on every launch, which is why the window opened but nothing in
+  /// it ever responded.
+  final double opacity;
 
   @override
   Widget build(BuildContext context) => Positioned.fill(
         child: IgnorePointer(
-          child: ColoredBox(
+          child: AnimatedOpacity(
+            opacity: opacity,
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            child: ColoredBox(
             color: JotColors.scrim,
             child: Center(
               child: Container(
@@ -115,6 +128,7 @@ class DropTargetOverlay extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
             ),
           ),
         ),

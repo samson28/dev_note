@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/app_version.dart';
+import 'core/single_instance.dart';
 import 'core/models/app_settings.dart';
 import 'core/theme/jot_theme.dart';
 import 'state/settings_notifier.dart';
@@ -49,6 +50,11 @@ Future<void> main(List<String> args) async {
       (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 
   if (isDesktop) {
+    // A second launch must never start a competing engine: two processes
+    // fighting over the same index file, global hotkey and tray icon is
+    // what left the app fully unresponsive after a double launch. This has
+    // to run before anything claims those resources.
+    if (await SingleInstance.alreadyRunning()) return;
     await configureMainWindow();
   } else if (!kIsWeb && Platform.isWindows) {
     await configureMobilePreviewWindow();
@@ -66,6 +72,9 @@ Future<void> main(List<String> args) async {
       services.initialSettings.shortcutFor(ShortcutAction.quickCapture).parts.join(' '),
     );
     await JotTray.instance.install();
+    // A later launch pings this socket instead of starting its own engine;
+    // wire it to the same "come to front" logic the tray already uses.
+    SingleInstance.onActivate = JotTray.instance.showWindow;
   }
 
   runApp(

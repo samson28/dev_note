@@ -145,13 +145,10 @@ class _DropZoneState extends State<_DropZone> {
           widget.child,
           // Kept mounted so it fades rather than snapping over the window.
           // Short, because the answer to "will this accept my file?" should
-          // not be made to wait.
-          AnimatedOpacity(
-            opacity: _hovering ? 1 : 0,
-            duration: const Duration(milliseconds: 120),
-            curve: Curves.easeOut,
-            child: const DropTargetOverlay(),
-          ),
+          // not be made to wait. The opacity animation lives inside
+          // DropTargetOverlay itself — it has to stay the direct child of
+          // this Stack, see the comment on its `opacity` parameter.
+          DropTargetOverlay(opacity: _hovering ? 1 : 0),
         ],
       ),
     );
