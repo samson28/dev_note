@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../core/content_limits.dart';
 import '../core/models/note.dart';
 import '../core/models/note_type.dart';
 import '../core/theme/jot_theme.dart';
@@ -55,6 +56,14 @@ class _NoteBodyState extends State<NoteBody> {
 
   bool _raw = false;
 
+  /// True once the user has explicitly asked to edit a large note live.
+  /// Below [ContentLimits.large] this is irrelevant, the editor is always
+  /// available; above it, a single `TextField` holding the whole body is
+  /// expensive regardless of note type, so it stops being what opens
+  /// automatically the moment "brut" (or a text note, which is always in
+  /// this mode) would otherwise show it.
+  bool _forceEdit = false;
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +77,7 @@ class _NoteBodyState extends State<NoteBody> {
     if (oldWidget.note.id != widget.note.id) {
       _controller.text = widget.note.content;
       _raw = false;
+      _forceEdit = false;
     } else if (!_focus.hasFocus && widget.note.content != _controller.text) {
       // An external edit landed via the watcher while we were not typing.
       _controller.text = widget.note.content;
@@ -153,27 +163,47 @@ class _NoteBodyState extends State<NoteBody> {
     );
   }
 
-  Widget _buildEditor() => Padding(
-        padding: EdgeInsets.fromLTRB(widget.framed ? 16 : 12, 12, 12, 12),
-        child: TextField(
-          controller: _controller,
-          focusNode: _focus,
-          onChanged: widget.onChanged,
-          maxLines: null,
-          expands: true,
-          cursorColor: JotColors.accent,
-          cursorWidth: 1.5,
-          style: widget.note.type == NoteType.text
-              ? JotText.ui(size: 13, height: 1.7, color: JotColors.textPrimary)
-              : JotText.mono(size: widget.fontSize, height: 1.85, color: JotColors.textPrimary),
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            isCollapsed: true,
-            hintText: 'Note rapide...',
-            hintStyle: JotText.ui(size: 12.5, height: 1.5, color: JotColors.textDisabled),
-          ),
-        ),
+  Widget _buildEditor() {
+    final content = widget.note.content;
+
+    // A single TextField holding a hundred thousand characters is expensive
+    // to lay out on every keystroke regardless of what kind of note it is.
+    // Reading a large note stays instant (the same virtualised view the
+    // rendered tab uses for oversized JSON); editing it live is one explicit
+    // tap away rather than what greets the user by default.
+    if (ContentLimits.isLarge(content) && !_forceEdit) {
+      return LargeContentNotice(
+        source: content,
+        fontSize: widget.fontSize,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        showLineNumbers: widget.showLineNumbers,
+        actionLabel: 'Modifier quand même',
+        onForceRender: () => setState(() => _forceEdit = true),
       );
+    }
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(widget.framed ? 16 : 12, 12, 12, 12),
+      child: TextField(
+        controller: _controller,
+        focusNode: _focus,
+        onChanged: widget.onChanged,
+        maxLines: null,
+        expands: true,
+        cursorColor: JotColors.accent,
+        cursorWidth: 1.5,
+        style: widget.note.type == NoteType.text
+            ? JotText.ui(size: 13, height: 1.7, color: JotColors.textPrimary)
+            : JotText.mono(size: widget.fontSize, height: 1.85, color: JotColors.textPrimary),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          isCollapsed: true,
+          hintText: 'Note rapide...',
+          hintStyle: JotText.ui(size: 12.5, height: 1.5, color: JotColors.textDisabled),
+        ),
+      ),
+    );
+  }
 }
 
 /// A URL note: the address in the accent colour on its own, since that is the

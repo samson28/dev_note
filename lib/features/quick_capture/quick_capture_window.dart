@@ -3,6 +3,7 @@ import 'package:flutter/material.dart'
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../core/content_limits.dart';
 import '../../core/models/app_settings.dart';
 import '../../core/models/note.dart';
 import '../../core/models/note_type.dart';
@@ -98,6 +99,12 @@ class _QuickCaptureWindowState extends State<QuickCaptureWindow> {
 
   void _onChanged(String value) {
     if (_typeLocked) return;
+    // A capture that has grown past ContentLimits.large stops re-detecting
+    // on every keystroke, the same full-document scan run on every single
+    // character is exactly the kind of stutter capture exists to avoid, and
+    // a badge that keeps flickering on a huge paste tells the user nothing
+    // useful anyway.
+    if (ContentLimits.isLarge(value)) return;
     final detected = NoteTypeDetector.detect(value);
     if (detected != _type) setState(() => _type = detected);
   }

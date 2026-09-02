@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../widgets/jot_icons.dart';
+import '../../../core/content_limits.dart';
 import '../../../core/models/note.dart';
 import '../../../core/models/note_type.dart';
 import '../../../core/theme/jot_theme.dart';
@@ -68,13 +69,19 @@ class _EditorState extends ConsumerState<_Editor> {
                 settingsProvider.select((s) => s.showLineNumbers),
               ),
               // Retyping the body can change what the note *is*, a pasted
-              // JSON blob should pick up its badge without being asked.
+              // JSON blob should pick up its badge without being asked. Only
+              // while the note is small, though: this ran the detector twice
+              // on every single keystroke, over the whole body each time, and
+              // for a note past ContentLimits.large that turned every
+              // keystroke into two full-document regex scans.
               onChanged: (content) => vault.edit(
                 note.copyWith(
                   content: content,
-                  type: note.type == NoteTypeDetector.detect(note.content)
-                      ? NoteTypeDetector.detect(content)
-                      : note.type,
+                  type: ContentLimits.isLarge(content)
+                      ? note.type
+                      : (note.type == NoteTypeDetector.detect(note.content)
+                          ? NoteTypeDetector.detect(content)
+                          : note.type),
                 ),
               ),
             ),
@@ -365,10 +372,15 @@ class _StatusBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Past ContentLimits.large, canParse's decode is skipped: it ran on the
+    // whole body synchronously, on every keystroke, which is the same cost
+    // JsonViewer itself now avoids for large notes.
     final validity = switch (note.type) {
-      NoteType.json => JsonViewer.canParse(note.content)
-          ? _Validity('JSON valide', JotSyntax.key)
-          : _Validity('JSON invalide', JotColors.danger),
+      NoteType.json => ContentLimits.isLarge(note.content)
+          ? _Validity('JSON', JotColors.textDim)
+          : (JsonViewer.canParse(note.content)
+              ? _Validity('JSON valide', JotSyntax.key)
+              : _Validity('JSON invalide', JotColors.danger)),
       NoteType.url => _Validity('URL', JotSyntax.key),
       _ => null,
     };

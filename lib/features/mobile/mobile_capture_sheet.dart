@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/content_limits.dart';
 import '../../core/models/note_type.dart';
 import '../../core/theme/jot_theme.dart';
 import '../../state/settings_notifier.dart';
@@ -41,6 +42,13 @@ class _CaptureSheetState extends ConsumerState<_CaptureSheet> {
   final _focus = FocusNode();
   late String _folder;
   bool _saving = false;
+
+  /// The type badge freezes on the last value detected before the content
+  /// crossed ContentLimits.large. Below the threshold, [build] re-detects on
+  /// every rebuild (i.e. every keystroke); above it, re-running that scan on
+  /// the whole pasted text on every character is the exact stutter capture
+  /// exists to avoid.
+  NoteType _lastDetected = NoteType.text;
 
   @override
   void initState() {
@@ -87,7 +95,9 @@ class _CaptureSheetState extends ConsumerState<_CaptureSheet> {
     final text = _controller.text;
     final type = text.trim().isEmpty
         ? NoteType.text
-        : NoteTypeDetector.detect(text);
+        : (ContentLimits.isLarge(text)
+            ? _lastDetected
+            : (_lastDetected = NoteTypeDetector.detect(text)));
 
     return Padding(
       // Lifts the sheet above the on-screen keyboard.

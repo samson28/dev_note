@@ -8,9 +8,16 @@ import 'note_type.dart';
 /// one `.md` file (YAML frontmatter + body). [relativePath] is relative to the
 /// vault root and doubles as the file's identity on disk, while [id] is the
 /// stable identity used by the index and by the UI.
+// The `preview`/`lineCount` memoization fields below are the one exception
+// to immutability the linter cannot see past: each is write-once, from
+// unset to the single correct answer `content` implies, so the object's
+// observable state never changes after construction.
 @immutable
+// ignore: must_be_immutable
 class Note {
-  const Note({
+  // Not `const`: the preview/line-count caches below are mutable fields
+  // populated lazily, which a const constructor cannot coexist with.
+  Note({
     required this.id,
     required this.title,
     required this.type,
@@ -94,6 +101,13 @@ class Note {
     return name.split('.').last.toUpperCase();
   }
 
+  /// Cache for [preview], populated on first access. `Note` is otherwise
+  /// immutable, but this note's `content` never changes without a new `Note`
+  /// being constructed (`copyWith` always returns a fresh instance), so
+  /// caching here is safe: the value can only ever go from unset to one
+  /// correct answer.
+  String? _previewCache;
+
   /// The body collapsed onto a single line, this is what the note list and
   /// palette show under the title.
   ///
@@ -101,12 +115,33 @@ class Note {
   /// line is `{`, which tells the reader nothing. Flattening the whole body
   /// puts the first real keys and values in front of them instead, which is
   /// what makes a result recognisable at a glance.
+  ///
+  /// Computed once and cached: this getter used to re-run a regex over the
+  /// entire body on every access, and it is read once per note per rebuild
+  /// in every list that shows one (the home panel, the note list, search
+  /// results). For an ordinary note that is unmeasurable; for one with a
+  /// hundred thousand characters, read from several lists on the same frame,
+  /// it was not.
   String get preview {
+    final cached = _previewCache;
+    if (cached != null) return cached;
     final collapsed = content.replaceAll(RegExp(r'\s+'), ' ').trim();
-    return collapsed.length <= 220 ? collapsed : '${collapsed.substring(0, 220)}...';
+    final result = collapsed.length <= 220 ? collapsed : '${collapsed.substring(0, 220)}...';
+    return _previewCache = result;
   }
 
-  int get lineCount => content.isEmpty ? 0 : content.split('\n').length;
+  /// Cache for [lineCount], same reasoning as [_previewCache]: the status bar
+  /// reads this on every keystroke while editing, and counting newlines by
+  /// splitting the whole body into a list of strings is wasted work to redo
+  /// on content that has not changed since the last read.
+  int? _lineCountCache;
+
+  int get lineCount {
+    final cached = _lineCountCache;
+    if (cached != null) return cached;
+    final result = content.isEmpty ? 0 : content.split('\n').length;
+    return _lineCountCache = result;
+  }
 
   Note copyWith({
     String? title,

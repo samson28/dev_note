@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart' show SelectableText;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../core/content_limits.dart';
 import '../core/theme/jot_theme.dart';
+import '../core/utils/jot_format.dart';
 import 'jot_primitives.dart';
 
 /// Collapsible JSON tree, reproducing the `arbre` view in the design:
@@ -57,19 +60,64 @@ class JsonViewerState extends State<JsonViewer> {
   Object? _decoded;
   Object? _error;
 
+  /// True once the user has explicitly asked to see a large document as a
+  /// structured tree. Content under [ContentLimits.large] never needs this,
+  /// it decodes straight away as it always has.
+  bool _forceRender = false;
+  bool _decoding = false;
+
   @override
   void initState() {
     super.initState();
-    _decode();
+    _maybeDecode();
   }
 
   @override
   void didUpdateWidget(JsonViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.source != widget.source) _decode();
+    if (oldWidget.source != widget.source) {
+      _decoded = null;
+      _error = null;
+      _forceRender = false;
+      _maybeDecode();
+    }
+  }
+
+  /// Decodes immediately for ordinary notes. For a large one, waits for
+  /// [_forceRender] instead: `jsonDecode` on a multi-hundred-thousand
+  /// character document is not free, and running it the moment such a note
+  /// is opened, before the user has asked for the tree view at all, is the
+  /// same mistake as building it eagerly.
+  void _maybeDecode() {
+    if (ContentLimits.isLarge(widget.source) && !_forceRender) return;
+    _decode();
   }
 
   void _decode() {
+    if (ContentLimits.isLarge(widget.source)) {
+      // Off the UI thread: even an explicit, one-time decode of a document
+      // this size can take long enough to freeze a frame, and freezing the
+      // frame right after the user asked to see more, not less, would be a
+      // strange way to answer them.
+      setState(() => _decoding = true);
+      compute(_decodeJson, widget.source).then((decoded) {
+        if (!mounted) return;
+        setState(() {
+          _decoding = false;
+          _decoded = decoded;
+          _error = null;
+        });
+      }).catchError((Object e) {
+        if (!mounted) return;
+        setState(() {
+          _decoding = false;
+          _decoded = null;
+          _error = e;
+        });
+      });
+      return;
+    }
+
     try {
       _decoded = jsonDecode(widget.source.trim());
       _error = null;
@@ -104,6 +152,26 @@ class JsonViewerState extends State<JsonViewer> {
 
   @override
   Widget build(BuildContext context) {
+    final large = ContentLimits.isLarge(widget.source);
+
+    if (large && !_forceRender) {
+      return LargeContentNotice(
+        source: widget.source,
+        fontSize: widget.fontSize,
+        padding: widget.padding,
+        showLineNumbers: widget.showLineNumbers,
+        actionLabel: 'Afficher en JSON structuré',
+        onForceRender: () {
+          setState(() => _forceRender = true);
+          _decode();
+        },
+      );
+    }
+
+    if (_decoding) {
+      return _DecodingNotice(fontSize: widget.fontSize, padding: widget.padding);
+    }
+
     if (_error != null || _decoded == null) {
       return _RawText(
         source: widget.source,
@@ -116,38 +184,40 @@ class JsonViewerState extends State<JsonViewer> {
     final rows = <_Row>[];
     _flatten(_decoded, depth: 0, path: '\$', key: null, trailing: '', into: rows);
 
-    return SingleChildScrollView(
+    // A ListView.builder rather than a Column in a SingleChildScrollView:
+    // the Column built one real widget (and RenderObject) per row up front,
+    // for every row in the document, whether it was ever scrolled into view
+    // or not. That is what turned opening a very large JSON note into
+    // constructing hundreds of thousands of widgets synchronously on the
+    // first frame. This only ever builds what is on screen, plus a small
+    // buffer.
+    return ListView.builder(
       padding: widget.padding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < rows.length; i++)
-            _RowView(
-              row: rows[i],
-              lineNumber: i + 1,
-              showLineNumbers: widget.showLineNumbers,
-              indent: widget.indent,
-              fontSize: widget.fontSize,
-              highlighted: _isUnderHover(rows[i]),
-              bandTop: _bandEdge(rows, i, -1),
-              bandBottom: _bandEdge(rows, i, 1),
-              caret: widget.showCaret && i == rows.length - 1,
-              onToggle: rows[i].branchPath == null
-                  ? null
-                  : () => setState(() {
-                        final p = rows[i].branchPath!;
-                        if (!_collapsed.remove(p)) _collapsed.add(p);
-                      }),
-              onHover: (hovering) {
-                final owner = rows[i].ownerPath;
-                if (hovering) {
-                  if (_hoveredBranch != owner) setState(() => _hoveredBranch = owner);
-                } else if (_hoveredBranch == owner) {
-                  setState(() => _hoveredBranch = null);
-                }
-              },
-            ),
-        ],
+      itemCount: rows.length,
+      itemBuilder: (context, i) => _RowView(
+        row: rows[i],
+        lineNumber: i + 1,
+        showLineNumbers: widget.showLineNumbers,
+        indent: widget.indent,
+        fontSize: widget.fontSize,
+        highlighted: _isUnderHover(rows[i]),
+        bandTop: _bandEdge(rows, i, -1),
+        bandBottom: _bandEdge(rows, i, 1),
+        caret: widget.showCaret && i == rows.length - 1,
+        onToggle: rows[i].branchPath == null
+            ? null
+            : () => setState(() {
+                  final p = rows[i].branchPath!;
+                  if (!_collapsed.remove(p)) _collapsed.add(p);
+                }),
+        onHover: (hovering) {
+          final owner = rows[i].ownerPath;
+          if (hovering) {
+            if (_hoveredBranch != owner) setState(() => _hoveredBranch = owner);
+          } else if (_hoveredBranch == owner) {
+            setState(() => _hoveredBranch = null);
+          }
+        },
       ),
     );
   }
@@ -452,40 +522,130 @@ class _RawText extends StatelessWidget {
     final mono = JotText.mono(size: fontSize, height: 1.85, color: JotColors.textStrong);
     final lines = source.split('\n');
 
-    return SingleChildScrollView(
+    // ListView.builder, not a Column: this is the fallback for JSON that
+    // failed to parse, which is exactly the state an in-progress paste of a
+    // huge document sits in before the closing brace lands. A Column here
+    // built one Row per line for the whole file regardless of what was on
+    // screen; this only ever builds what is visible.
+    return ListView.builder(
       padding: padding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      itemCount: lines.length,
+      itemBuilder: (context, i) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (var i = 0; i < lines.length; i++)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (showLineNumbers)
-                  SizedBox(
-                    width: 44,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 14),
-                      child: Text(
-                        '${i + 1}',
-                        textAlign: TextAlign.right,
-                        style: mono.copyWith(color: JotSyntax.lineNumber),
-                      ),
-                    ),
-                  ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: SelectableText(lines[i], style: mono),
-                  ),
+          if (showLineNumbers)
+            SizedBox(
+              width: 44,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 14),
+                child: Text(
+                  '${i + 1}',
+                  textAlign: TextAlign.right,
+                  style: mono.copyWith(color: JotSyntax.lineNumber),
                 ),
-              ],
+              ),
             ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: SelectableText(lines[i], style: mono),
+            ),
+          ),
         ],
       ),
     );
   }
 }
+
+/// Shown for a note past [ContentLimits.large]: the raw text right away
+/// (virtualised, so it is cheap regardless of length), with a strip on top
+/// offering the heavier structured or highlighted view as a choice rather
+/// than something that happens automatically to every large note.
+class LargeContentNotice extends StatelessWidget {
+  const LargeContentNotice({
+    super.key,
+    required this.source,
+    required this.fontSize,
+    required this.padding,
+    required this.showLineNumbers,
+    required this.actionLabel,
+    required this.onForceRender,
+  });
+
+  final String source;
+  final double fontSize;
+  final EdgeInsets padding;
+  final bool showLineNumbers;
+  final String actionLabel;
+  final VoidCallback onForceRender;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: JotColors.codePanelHeader,
+              border: Border(bottom: BorderSide(color: JotColors.borderEditor)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Document volumineux (${JotFormat.bytes(source.length)}) : affiché en texte '
+                    'brut pour rester réactif.',
+                    style: JotText.mono(size: 11, color: JotSyntax.lineNumber),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Hoverable(
+                  onTap: onForceRender,
+                  builder: (context, hovered) => Text(
+                    actionLabel,
+                    style: JotText.mono(
+                      size: 11,
+                      weight: FontWeight.w500,
+                      color: hovered ? JotColors.textDim : JotSyntax.key,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _RawText(
+              source: source,
+              fontSize: fontSize,
+              padding: padding,
+              showLineNumbers: showLineNumbers,
+            ),
+          ),
+        ],
+      );
+}
+
+/// Shown while an explicitly requested decode of a large document runs on a
+/// background isolate.
+class _DecodingNotice extends StatelessWidget {
+  const _DecodingNotice({required this.fontSize, required this.padding});
+
+  final double fontSize;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: padding,
+        child: Text(
+          'Analyse du document...',
+          style: JotText.mono(size: fontSize, color: JotSyntax.lineNumber),
+        ),
+      );
+}
+
+/// Run via [compute] so decoding a large document happens on a background
+/// isolate rather than blocking the frame that is drawing the result.
+Object? _decodeJson(String source) => jsonDecode(source.trim());
 
 /// `@keyframes caret { 0%,49%{opacity:1} 50%,100%{opacity:0} }` at 1.1s,
 /// stepped, so it snaps rather than fades.
