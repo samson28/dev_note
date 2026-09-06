@@ -1,8 +1,11 @@
 """Generates the Dev Note logo.
 
-The mark is a terminal prompt: a caret and a line, `>_`. It says "developer"
-without a single literal symbol of the trade (no gear, no brackets, no
-lightbulb), and it survives being drawn at 16 pixels, which most marks do not.
+The mark is a closed journal: a cover with a spine line near the left edge,
+three ruled lines standing in for text, and a notched ribbon bookmark hanging
+from the top. It says "notebook" before anything else, which a terminal-style
+`>_` glyph never did, and it survives being drawn at 16 pixels because every
+element is a straight line or one gentle corner, nothing that turns to mush
+when downsampled.
 
 Kept as a script rather than checked-in binaries alone so the icon can be
 regenerated at any size, and so its geometry is reviewable like the rest of
@@ -17,21 +20,53 @@ import zlib
 
 from PIL import Image, ImageDraw
 
-# The accent from the design's palette: #FF6A3D over #E0511F, top to bottom.
-# A flat fill reads dull at large sizes and the gradient is invisible at 16px,
-# so it costs nothing where it cannot help.
-ACCENT_TOP = (255, 106, 61)
-ACCENT_BOTTOM = (224, 81, 31)
+# Blue, not the app's orange accent: the accent is a UI choice the user can
+# change per JotAccent, the mark itself is fixed and deliberately does not
+# follow it (see AppMark's docstring). Picked to read as ink/cover blue
+# rather than violet.
+ACCENT_TOP = (76, 141, 245)  # #4C8DF5
+ACCENT_BOTTOM = (26, 74, 158)  # #1A4A9E
 MARK = (255, 255, 255)
 
 # Geometry on a 256 grid. Supersampled 8x before it is drawn, so these are
 # exact rather than pixel-snapped.
 SIZE = 256
 RADIUS = 58
-STROKE = 30
 
-CARET = [(74, 76), (126, 128), (74, 180)]
-LINE = [(150, 180), (196, 180)]
+# The cover outline: two straight top/left/bottom edges, one rounded corner
+# top-right (a quadratic bezier, sampled below), closed back to the start.
+OUTLINE_START = (70, 52)
+OUTLINE_TOP_RIGHT = (188, 52)
+OUTLINE_CORNER_CONTROL = (198, 52)
+OUTLINE_CORNER_END = (198, 62)
+OUTLINE_BOTTOM_RIGHT = (198, 204)
+OUTLINE_BOTTOM_LEFT = (70, 204)
+OUTLINE_STROKE = 16
+
+SPINE = [(88, 52), (88, 204)]
+SPINE_STROKE = 14
+
+RULED_LINES = [
+    [(110, 104), (172, 104)],
+    [(110, 130), (172, 130)],
+    [(110, 156), (150, 156)],
+]
+RULED_STROKE = 12
+
+# Icons at 32px and below never resolve the ribbon's notch or three separate
+# ruled lines, they blur into one smear rather than reading as detail, so the
+# smallest sizes drop to two bolder lines and no ribbon instead. The outline
+# and the spine, the two things that actually say "book", stay everywhere.
+RULED_LINES_SMALL = [
+    [(108, 112), (174, 112)],
+    [(108, 148), (174, 148)],
+]
+RULED_STROKE_SMALL = 18
+SMALL_CUTOFF = 32
+
+# A ribbon with a notch cut into its bottom edge, like a bookmark peeking out
+# from between the pages.
+RIBBON = [(146, 52), (146, 92), (134, 80), (122, 92), (122, 52)]
 
 SS = 8  # supersampling factor
 
@@ -57,6 +92,30 @@ def _stroke(draw: ImageDraw.ImageDraw, points, width: int) -> None:
         draw.ellipse([x - r, y - r, x + r, y + r], fill=MARK)
 
 
+def _quad_bezier(p0, p1, p2, steps: int = 10):
+    """Samples a quadratic bezier, used for the cover's one rounded corner.
+
+    `_stroke` only draws straight segments, so a smooth corner needs enough
+    points along the curve to look round rather than faceted once it is
+    scaled up to the largest icon sizes.
+    """
+    points = []
+    for i in range(steps + 1):
+        t = i / steps
+        x = (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t**2 * p2[0]
+        y = (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t**2 * p2[1]
+        points.append((x, y))
+    return points
+
+
+def _outline_points():
+    return (
+        [OUTLINE_START, OUTLINE_TOP_RIGHT]
+        + _quad_bezier(OUTLINE_TOP_RIGHT, OUTLINE_CORNER_CONTROL, OUTLINE_CORNER_END)[1:]
+        + [OUTLINE_BOTTOM_RIGHT, OUTLINE_BOTTOM_LEFT, OUTLINE_START]
+    )
+
+
 def render(size: int) -> Image.Image:
     s = SIZE * SS
     scale = s / SIZE
@@ -74,8 +133,19 @@ def render(size: int) -> Image.Image:
     icon.paste(tile, (0, 0), mask)
 
     draw = ImageDraw.Draw(icon)
-    _stroke(draw, [(x * scale, y * scale) for x, y in CARET], round(STROKE * scale))
-    _stroke(draw, [(x * scale, y * scale) for x, y in LINE], round(STROKE * scale))
+
+    def at_scale(points):
+        return [(x * scale, y * scale) for x, y in points]
+
+    _stroke(draw, at_scale(_outline_points()), round(OUTLINE_STROKE * scale))
+    _stroke(draw, at_scale(SPINE), round(SPINE_STROKE * scale))
+    if size <= SMALL_CUTOFF:
+        for line in RULED_LINES_SMALL:
+            _stroke(draw, at_scale(line), round(RULED_STROKE_SMALL * scale))
+    else:
+        for line in RULED_LINES:
+            _stroke(draw, at_scale(line), round(RULED_STROKE * scale))
+        draw.polygon(at_scale(RIBBON), fill=MARK)
 
     return icon.resize((size, size), Image.LANCZOS)
 
@@ -126,18 +196,27 @@ def write_ico(path: str, sizes) -> None:
         f.write(header + entries + b"".join(images))
 
 
-SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Dev Note">
+def _svg_path_d(points) -> str:
+    d = f"M{points[0][0]},{points[0][1]}"
+    for x, y in points[1:]:
+        d += f" L{x},{y}"
+    return d
+
+
+SVG = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Dev Note">
   <defs>
     <linearGradient id="a" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FF6A3D"/>
-      <stop offset="1" stop-color="#E0511F"/>
+      <stop offset="0" stop-color="#4C8DF5"/>
+      <stop offset="1" stop-color="#1A4A9E"/>
     </linearGradient>
   </defs>
   <rect width="256" height="256" rx="58" fill="url(#a)"/>
-  <g fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="74,76 126,128 74,180"/>
-    <line x1="150" y1="180" x2="196" y2="180"/>
+  <path d="M{OUTLINE_START[0]},{OUTLINE_START[1]} L{OUTLINE_TOP_RIGHT[0]},{OUTLINE_TOP_RIGHT[1]} Q{OUTLINE_CORNER_CONTROL[0]},{OUTLINE_CORNER_CONTROL[1]} {OUTLINE_CORNER_END[0]},{OUTLINE_CORNER_END[1]} L{OUTLINE_BOTTOM_RIGHT[0]},{OUTLINE_BOTTOM_RIGHT[1]} L{OUTLINE_BOTTOM_LEFT[0]},{OUTLINE_BOTTOM_LEFT[1]} Z" fill="none" stroke="#FFFFFF" stroke-width="{OUTLINE_STROKE}" stroke-linejoin="round"/>
+  <line x1="{SPINE[0][0]}" y1="{SPINE[0][1]}" x2="{SPINE[1][0]}" y2="{SPINE[1][1]}" stroke="#FFFFFF" stroke-width="{SPINE_STROKE}" stroke-linecap="round"/>
+  <g stroke="#FFFFFF" stroke-linecap="round">
+{chr(10).join(f'    <line x1="{a[0]}" y1="{a[1]}" x2="{b[0]}" y2="{b[1]}" stroke-width="{RULED_STROKE}"/>' for a, b in RULED_LINES)}
   </g>
+  <path d="{_svg_path_d(RIBBON)} Z" fill="#FFFFFF"/>
 </svg>
 """
 
