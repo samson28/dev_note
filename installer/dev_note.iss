@@ -12,7 +12,7 @@
 ; Le resultat est ecrit dans dist\, qui est deja ignore par git.
 
 #define MyAppName "Dev Note"
-#define MyAppVersion "0.1.1"
+#define MyAppVersion "0.1.2"
 #define MyAppPublisher "Samson BADAYODI"
 #define MyAppURL "https://github.com/samson28/dev_note"
 #define MyAppExeName "dev_note.exe"
