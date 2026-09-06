@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../core/content_limits.dart';
 import '../core/models/note.dart';
 import '../core/models/note_type.dart';
 import 'database.dart';
@@ -165,11 +166,29 @@ class IndexRepository {
       );
       await db.customStatement(
         'INSERT INTO notes_fts (note_id, title, content, tags) VALUES (?, ?, ?, ?)',
-        [note.id, note.title, note.content, note.tags.join(' ')],
+        [note.id, note.title, _indexedBody(note.content), note.tags.join(' ')],
       );
     });
     _cachedCount = -1;
   }
+
+  /// The text handed to FTS5 for one note, capped at [ContentLimits.large].
+  ///
+  /// `upsert` runs on the debounced autosave path (every ~400ms of typing
+  /// pause), and without a cap the cost of the `DELETE`+`INSERT` here, SQLite
+  /// re-tokenising the whole body, the row it writes to disk, scales with the
+  /// note's size with no ceiling: a 5MB imported log would re-index all 5MB
+  /// on every pause in typing, on every keystroke burst, for as long as the
+  /// note stays open. Capping bounds that cost the same way the viewers and
+  /// the editor are already bounded, at the cost of full-text search not
+  /// reaching past the first [ContentLimits.large] characters of an oversized
+  /// note. That trade is accepted here for the same reason it is everywhere
+  /// else in this file: a search that finds nothing is a worse failure than
+  /// one that occasionally misses a match deep inside a note nobody scrolls
+  /// that far into anyway, but a save that never finishes is worse than both.
+  static String _indexedBody(String content) => content.length > ContentLimits.large
+      ? content.substring(0, ContentLimits.large)
+      : content;
 
   Future<void> remove(String id) async {
     await db.transaction(() async {
