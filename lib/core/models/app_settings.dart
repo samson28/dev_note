@@ -30,10 +30,10 @@ enum JotAccent {
   final Color color;
 
   static JotAccent fromId(String? id) =>
-      JotAccent.values.firstWhere((a) => a.id == id, orElse: () => orange);
+      JotAccent.values.firstWhere((a) => a.id == id, orElse: () => blue);
 
   /// Text/icon colour to place on top of a solid fill of this accent.
-  Color get onColor => this == orange ? JotColors.onAccent : const Color(0xFF12100A);
+  Color get onColor => this == blue ? JotColors.onAccent : const Color(0xFF12100A);
 }
 
 enum ListDensity {
@@ -192,7 +192,7 @@ class AppSettings {
     this.theme = JotThemeMode.anthracite,
     // "Suivre le système : activé par défaut" (design, Règles de bascule).
     this.followSystemTheme = true,
-    this.accent = JotAccent.orange,
+    this.accent = JotAccent.blue,
     this.textSize = 13,
     this.codeLigatures = true,
     this.density = ListDensity.comfortable,

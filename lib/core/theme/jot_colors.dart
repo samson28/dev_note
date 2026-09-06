@@ -76,10 +76,10 @@ abstract final class JotColors {
   static Color get accent => _active.accent;
   static Color get accentHover => _active.isLight
       ? _active.accent.withValues(alpha: 0.85)
-      : const Color(0xFFFF8A63);
+      : const Color(0xFF7FBBFF);
   static Color get onAccent => _active.onAccent;
   static Color get accentHighlightText =>
-      _active.isLight ? _active.accent : const Color(0xFFFFB699);
+      _active.isLight ? _active.accent : const Color(0xFFAFD3FF);
 
   static Color get accentWashSidebar => _active.accentWash(0.13);
   static Color get accentWashList => _active.accentWash(0.10);

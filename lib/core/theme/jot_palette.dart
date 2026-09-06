@@ -93,13 +93,16 @@ class JotPalette {
 
   /// Applies the user's accent choice on top of a theme's base palette.
   ///
-  /// The design darkens the accent to `#E0511F` on light ("assombri pour tenir
-  /// 4,5:1 sur blanc") and lightens it to `#FF7A4F` on OLED. Only the default
-  /// orange has those hand-tuned variants, so any other swatch is adjusted the
-  /// same direction rather than used raw against a background it was never
-  /// checked against.
+  /// Blue is the default and, like the orange it replaced, gets a hand-picked
+  /// variant per theme rather than the generic formula below: `#1F6FCC` on
+  /// light ("assombri pour tenir 4,5:1 sur blanc", the same shade already
+  /// used for links and the JSON-key colour there) and `#6FB2FF` on OLED
+  /// (already the OLED link colour, brightened for contrast on pure black).
+  /// Any other swatch, orange included now that it is no longer the default,
+  /// is adjusted the same direction instead of used raw against a background
+  /// it was never checked against.
   JotPalette withAccent(JotAccent choice) {
-    if (choice == JotAccent.orange) return this;
+    if (choice == JotAccent.blue) return this;
 
     final tuned = isLight
         ? _shade(choice.color, -0.22)
@@ -171,7 +174,7 @@ class JotPalette {
   }
 
   // ------------------------------------------------------------------ 6a
-  /// "fond F7F7F5, surface FFFFFF, filet E3E3DE · accent E0511F, assombri pour
+  /// "fond F7F7F5, surface FFFFFF, filet E3E3DE · accent 1F6FCC, assombri pour
   /// tenir 4,5:1 sur blanc · syntaxe désaturée."
   static const light = JotPalette(
     id: 'light',
@@ -188,7 +191,7 @@ class JotPalette {
     textMuted: Color(0xFF8A8C93),
     textDim: Color(0xFF9A9CA3),
     textDisabled: Color(0xFFB4B6BB),
-    accent: Color(0xFFE0511F),
+    accent: Color(0xFF1F6FCC),
     onAccent: Color(0xFFFFFFFF),
     syntaxKey: Color(0xFF1F6FCC),
     syntaxString: Color(0xFF2F7D45),
@@ -204,8 +207,8 @@ class JotPalette {
   );
 
   // ------------------------------------------------------------------ 6b
-  /// "fond 17181B, surface 1E1F23, filet 2A2C31 · accent FF6A3D sur texte
-  /// sombre 140A06 · élévations autorisées."
+  /// "fond 17181B, surface 1E1F23, filet 2A2C31 · accent 58A6FF sur texte
+  /// sombre 0B1420 · élévations autorisées."
   static const anthracite = JotPalette(
     id: 'anthracite',
     isLight: false,
@@ -221,8 +224,8 @@ class JotPalette {
     textMuted: Color(0xFF9A9CA3),
     textDim: Color(0xFF5F6169),
     textDisabled: Color(0xFF4A4C53),
-    accent: Color(0xFFFF6A3D),
-    onAccent: Color(0xFF140A06),
+    accent: Color(0xFF58A6FF),
+    onAccent: Color(0xFF0B1420),
     syntaxKey: Color(0xFF7FB2F0),
     syntaxString: Color(0xFFC3E88D),
     syntaxNumber: Color(0xFFF0A15E),
@@ -238,7 +241,7 @@ class JotPalette {
 
   // ------------------------------------------------------------------ 6c
   /// "fond 000000 partout, aucune carte grise · séparation par filets 1F1F22,
-  /// zéro ombre portée · accent éclairci FF7A4F, texte mini 6B6B70 pour éviter
+  /// zéro ombre portée · accent éclairci 6FB2FF, texte mini 6B6B70 pour éviter
   /// l'écrasement des noirs."
   ///
   /// Every surface token collapses to pure black on purpose: the separation
@@ -258,8 +261,8 @@ class JotPalette {
     textMuted: Color(0xFF9C9CA2),
     textDim: Color(0xFF6B6B70),
     textDisabled: Color(0xFF4A4A4F),
-    accent: Color(0xFFFF7A4F),
-    onAccent: Color(0xFF160800),
+    accent: Color(0xFF6FB2FF),
+    onAccent: Color(0xFF0A121C),
     syntaxKey: Color(0xFF8CBCF5),
     syntaxString: Color(0xFFCBEE96),
     syntaxNumber: Color(0xFFE8BC53),
